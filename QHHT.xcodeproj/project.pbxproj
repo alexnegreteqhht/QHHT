@@ -7,19 +7,35 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5D45368829CED73A00BB11AD /* DataStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D45368729CED73A00BB11AD /* DataStruct.swift */; };
 		5DDDD7FB29CE873B00572BE0 /* QHHTApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD7FA29CE873B00572BE0 /* QHHTApp.swift */; };
 		5DDDD7FD29CE873B00572BE0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD7FC29CE873B00572BE0 /* ContentView.swift */; };
 		5DDDD7FF29CE873C00572BE0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DDDD7FE29CE873C00572BE0 /* Assets.xcassets */; };
 		5DDDD80329CE873C00572BE0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DDDD80229CE873C00572BE0 /* Preview Assets.xcassets */; };
+		5DDDD80A29CE939500572BE0 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD80929CE939500572BE0 /* AboutView.swift */; };
+		5DDDD80C29CE93D800572BE0 /* PractitionerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD80B29CE93D800572BE0 /* PractitionerView.swift */; };
+		5DDDD80E29CE941000572BE0 /* ServicesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD80D29CE941000572BE0 /* ServicesView.swift */; };
+		5DDDD81029CE943100572BE0 /* TestimonialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD80F29CE943100572BE0 /* TestimonialsView.swift */; };
+		5DDDD81229CE945100572BE0 /* ContactView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD81129CE945100572BE0 /* ContactView.swift */; };
+		5DDDD81429CE94C200572BE0 /* AppData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD81329CE94C200572BE0 /* AppData.swift */; };
+		5DDDD81729CE9FA500572BE0 /* ImageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD81629CE9FA500572BE0 /* ImageHandler.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5D45368729CED73A00BB11AD /* DataStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStruct.swift; sourceTree = "<group>"; };
 		5DDDD7F729CE873B00572BE0 /* QHHT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QHHT.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DDDD7FA29CE873B00572BE0 /* QHHTApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QHHTApp.swift; sourceTree = "<group>"; };
 		5DDDD7FC29CE873B00572BE0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		5DDDD7FE29CE873C00572BE0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5DDDD80029CE873C00572BE0 /* QHHT.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QHHT.entitlements; sourceTree = "<group>"; };
 		5DDDD80229CE873C00572BE0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		5DDDD80929CE939500572BE0 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		5DDDD80B29CE93D800572BE0 /* PractitionerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PractitionerView.swift; sourceTree = "<group>"; };
+		5DDDD80D29CE941000572BE0 /* ServicesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesView.swift; sourceTree = "<group>"; };
+		5DDDD80F29CE943100572BE0 /* TestimonialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestimonialsView.swift; sourceTree = "<group>"; };
+		5DDDD81129CE945100572BE0 /* ContactView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactView.swift; sourceTree = "<group>"; };
+		5DDDD81329CE94C200572BE0 /* AppData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppData.swift; sourceTree = "<group>"; };
+		5DDDD81629CE9FA500572BE0 /* ImageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageHandler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +52,7 @@
 		5DDDD7EE29CE873B00572BE0 = {
 			isa = PBXGroup;
 			children = (
+				5DDDD81529CE9F9400572BE0 /* Data */,
 				5DDDD7F929CE873B00572BE0 /* QHHT */,
 				5DDDD7F829CE873B00572BE0 /* Products */,
 			);
@@ -54,6 +71,11 @@
 			children = (
 				5DDDD7FA29CE873B00572BE0 /* QHHTApp.swift */,
 				5DDDD7FC29CE873B00572BE0 /* ContentView.swift */,
+				5DDDD80929CE939500572BE0 /* AboutView.swift */,
+				5DDDD80B29CE93D800572BE0 /* PractitionerView.swift */,
+				5DDDD80D29CE941000572BE0 /* ServicesView.swift */,
+				5DDDD80F29CE943100572BE0 /* TestimonialsView.swift */,
+				5DDDD81129CE945100572BE0 /* ContactView.swift */,
 				5DDDD7FE29CE873C00572BE0 /* Assets.xcassets */,
 				5DDDD80029CE873C00572BE0 /* QHHT.entitlements */,
 				5DDDD80129CE873C00572BE0 /* Preview Content */,
@@ -67,6 +89,16 @@
 				5DDDD80229CE873C00572BE0 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		5DDDD81529CE9F9400572BE0 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				5DDDD81329CE94C200572BE0 /* AppData.swift */,
+				5D45368729CED73A00BB11AD /* DataStruct.swift */,
+				5DDDD81629CE9FA500572BE0 /* ImageHandler.swift */,
+			);
+			path = Data;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -139,7 +171,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5D45368829CED73A00BB11AD /* DataStruct.swift in Sources */,
+				5DDDD81729CE9FA500572BE0 /* ImageHandler.swift in Sources */,
+				5DDDD80E29CE941000572BE0 /* ServicesView.swift in Sources */,
+				5DDDD80C29CE93D800572BE0 /* PractitionerView.swift in Sources */,
+				5DDDD81029CE943100572BE0 /* TestimonialsView.swift in Sources */,
+				5DDDD81429CE94C200572BE0 /* AppData.swift in Sources */,
 				5DDDD7FD29CE873B00572BE0 /* ContentView.swift in Sources */,
+				5DDDD81229CE945100572BE0 /* ContactView.swift in Sources */,
+				5DDDD80A29CE939500572BE0 /* AboutView.swift in Sources */,
 				5DDDD7FB29CE873B00572BE0 /* QHHTApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -265,6 +305,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"QHHT/Preview Content\"";
+				DEVELOPMENT_TEAM = 7C52729FVD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -301,6 +342,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"QHHT/Preview Content\"";
+				DEVELOPMENT_TEAM = 7C52729FVD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;

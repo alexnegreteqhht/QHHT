@@ -1,17 +1,14 @@
-//
-//  QHHTApp.swift
-//  QHHT
-//
-//  Created by Alex Negrete on 3/24/23.
-//
+import SwiftUI // Import the SwiftUI framework
 
-import SwiftUI
-
+// Define the main app struct
 @main
 struct QHHTApp: App {
+    
+    // Define the app's body
     var body: some Scene {
+        // Define the window group
         WindowGroup {
-            ContentView()
+            ContentView() // Display the ContentView
         }
     }
 }
