@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5D45368829CED73A00BB11AD /* DataStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D45368729CED73A00BB11AD /* DataStruct.swift */; };
+		5DC2BDE229DC69120002C2FF /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC2BDE129DC69120002C2FF /* LoginView.swift */; };
 		5DDDD7FB29CE873B00572BE0 /* QHHTApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD7FA29CE873B00572BE0 /* QHHTApp.swift */; };
 		5DDDD7FD29CE873B00572BE0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD7FC29CE873B00572BE0 /* ContentView.swift */; };
 		5DDDD7FF29CE873C00572BE0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DDDD7FE29CE873C00572BE0 /* Assets.xcassets */; };
@@ -23,6 +24,7 @@
 
 /* Begin PBXFileReference section */
 		5D45368729CED73A00BB11AD /* DataStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStruct.swift; sourceTree = "<group>"; };
+		5DC2BDE129DC69120002C2FF /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		5DDDD7F729CE873B00572BE0 /* QHHT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QHHT.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DDDD7FA29CE873B00572BE0 /* QHHTApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QHHTApp.swift; sourceTree = "<group>"; };
 		5DDDD7FC29CE873B00572BE0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -70,6 +72,7 @@
 			isa = PBXGroup;
 			children = (
 				5DDDD7FA29CE873B00572BE0 /* QHHTApp.swift */,
+				5DC2BDE129DC69120002C2FF /* LoginView.swift */,
 				5DDDD7FC29CE873B00572BE0 /* ContentView.swift */,
 				5DDDD80929CE939500572BE0 /* AboutView.swift */,
 				5DDDD80B29CE93D800572BE0 /* PractitionerView.swift */,
@@ -145,6 +148,8 @@
 				Base,
 			);
 			mainGroup = 5DDDD7EE29CE873B00572BE0;
+			packageReferences = (
+			);
 			productRefGroup = 5DDDD7F829CE873B00572BE0 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -180,6 +185,7 @@
 				5DDDD7FD29CE873B00572BE0 /* ContentView.swift in Sources */,
 				5DDDD81229CE945100572BE0 /* ContactView.swift in Sources */,
 				5DDDD80A29CE939500572BE0 /* AboutView.swift in Sources */,
+				5DC2BDE229DC69120002C2FF /* LoginView.swift in Sources */,
 				5DDDD7FB29CE873B00572BE0 /* QHHTApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
