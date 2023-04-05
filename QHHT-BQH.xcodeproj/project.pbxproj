@@ -25,7 +25,7 @@
 /* Begin PBXFileReference section */
 		5D45368729CED73A00BB11AD /* DataStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStruct.swift; sourceTree = "<group>"; };
 		5DC2BDE129DC69120002C2FF /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
-		5DDDD7F729CE873B00572BE0 /* QHHT and BQH.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "QHHT and BQH.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5DDDD7F729CE873B00572BE0 /* QHHT-BQH.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "QHHT-BQH.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DDDD7FA29CE873B00572BE0 /* QHHTApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QHHTApp.swift; sourceTree = "<group>"; };
 		5DDDD7FC29CE873B00572BE0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		5DDDD7FE29CE873C00572BE0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -63,7 +63,7 @@
 		5DDDD7F829CE873B00572BE0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				5DDDD7F729CE873B00572BE0 /* QHHT and BQH.app */,
+				5DDDD7F729CE873B00572BE0 /* QHHT-BQH.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -107,9 +107,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		5DDDD7F629CE873B00572BE0 /* QHHT and BQH */ = {
+		5DDDD7F629CE873B00572BE0 /* QHHT-BQH */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5DDDD80629CE873C00572BE0 /* Build configuration list for PBXNativeTarget "QHHT and BQH" */;
+			buildConfigurationList = 5DDDD80629CE873C00572BE0 /* Build configuration list for PBXNativeTarget "QHHT-BQH" */;
 			buildPhases = (
 				5DDDD7F329CE873B00572BE0 /* Sources */,
 				5DDDD7F429CE873B00572BE0 /* Frameworks */,
@@ -119,9 +119,9 @@
 			);
 			dependencies = (
 			);
-			name = "QHHT and BQH";
+			name = "QHHT-BQH";
 			productName = QHHT;
-			productReference = 5DDDD7F729CE873B00572BE0 /* QHHT and BQH.app */;
+			productReference = 5DDDD7F729CE873B00572BE0 /* QHHT-BQH.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -139,7 +139,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 5DDDD7F229CE873B00572BE0 /* Build configuration list for PBXProject "QHHT and BQH" */;
+			buildConfigurationList = 5DDDD7F229CE873B00572BE0 /* Build configuration list for PBXProject "QHHT-BQH" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -154,7 +154,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				5DDDD7F629CE873B00572BE0 /* QHHT and BQH */,
+				5DDDD7F629CE873B00572BE0 /* QHHT-BQH */,
 			);
 		};
 /* End PBXProject section */
@@ -314,6 +314,7 @@
 				DEVELOPMENT_TEAM = 7C52729FVD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "QHHT & BQH";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -329,7 +330,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 12.6;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = alexnegreteqhht.QHHT;
+				PRODUCT_BUNDLE_IDENTIFIER = "alexnegrete.QHHT-BQH";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -351,6 +352,7 @@
 				DEVELOPMENT_TEAM = 7C52729FVD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "QHHT & BQH";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -366,7 +368,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 12.6;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = alexnegreteqhht.QHHT;
+				PRODUCT_BUNDLE_IDENTIFIER = "alexnegrete.QHHT-BQH";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -379,7 +381,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		5DDDD7F229CE873B00572BE0 /* Build configuration list for PBXProject "QHHT and BQH" */ = {
+		5DDDD7F229CE873B00572BE0 /* Build configuration list for PBXProject "QHHT-BQH" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5DDDD80429CE873C00572BE0 /* Debug */,
@@ -388,7 +390,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5DDDD80629CE873C00572BE0 /* Build configuration list for PBXNativeTarget "QHHT and BQH" */ = {
+		5DDDD80629CE873C00572BE0 /* Build configuration list for PBXNativeTarget "QHHT-BQH" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5DDDD80729CE873C00572BE0 /* Debug */,
