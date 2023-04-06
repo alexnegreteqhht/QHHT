@@ -144,28 +144,35 @@ struct SignInWithAppleButton: UIViewRepresentable {
                     // Retrieve user information
                     print(credentials)
                     
-                    // Get the Firebase user
-                    guard let currentUser = Auth.auth().currentUser else { return }
-                    let fullName = credentials.fullName
-                    let email = credentials.email
-                    
-                    // Add to Firestore
                     let db = Firestore.firestore()
                     let usersCollection = db.collection("users")
+                    let currentUser = Auth.auth().currentUser
+                    let uid = currentUser?.uid ?? ""
                     
-                    let userData: [String: Any] = [
-                        "uid": currentUser.uid,
-                        "fullName": "\(fullName?.givenName ?? "") \(fullName?.familyName ?? "")",
-                        "email": email ?? ""
-                    ]
-                                    
-                    print("currentUser.uid: ", currentUser.uid, " fullName: ", fullName ?? "No Name", " email: ", email ?? "No Email")
-                    
-                    usersCollection.document(currentUser.uid).setData(userData, merge: true) { error in
+                    // Check if the user data already exists in the database
+                    usersCollection.document(uid).getDocument { (snapshot, error) in
                         if let error = error {
-                            print("Error adding user document: \(error.localizedDescription)")
+                            print("Error retrieving user document: \(error.localizedDescription)")
+                        } else if snapshot?.exists == true {
+                            // User data already exists, do not write to the database again
+                            print("User data already exists in the database")
                         } else {
-                            print("User document added with ID: \(currentUser.uid)")
+                            // User data does not exist, write to the database
+                            let fullName = credentials.fullName
+                            let email = credentials.email
+                            
+                            let userData: [String: Any] = [
+                                "fullName": "\(fullName?.givenName ?? "") \(fullName?.familyName ?? "")",
+                                "email": email ?? ""
+                            ]
+                            
+                            usersCollection.document(uid).setData(userData, merge: true) { error in
+                                if let error = error {
+                                    print("Error adding user document: \(error.localizedDescription)")
+                                } else {
+                                    print("User document added with ID: \(uid)")
+                                }
+                            }
                         }
                     }
                 }
