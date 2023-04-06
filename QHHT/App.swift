@@ -2,6 +2,13 @@ import SwiftUI
 import AuthenticationServices
 import Firebase
 
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+        .environmentObject(AppData())
+    }
+}
+
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
@@ -54,24 +61,83 @@ struct QHHTBQHApp: App {
 
 struct ContentView: View {
     @EnvironmentObject var authStateDelegate: AuthStateDelegate
-    
+       
+    // Define the appData @StateObject
+    @StateObject var appData = AppData()
+       
+    // Define the selectedTab @State
+    @State private var selectedTab = 0
+       
+    // Define the ContentView body
     var body: some View {
-        VStack {
-            Text("Welcome to the app!")
-                .padding()
-            
-            Button(action: {
-                // Log out the user and set the isAuthenticated variable to false
-                try? Auth.auth().signOut()
-            }, label: {
-                Text("Log Out")
-            })
+           
+        // Define the TabView
+        TabView(selection: $selectedTab) {
+               
+            // Display the HomeView as the first tab
+            HomeView()
+                .navigationBarTitle("Home", displayMode: .automatic)
+                .tabItem {
+                    Image(systemName: "house")
+                    Text("Home")
+                }
+                .tag(0)
+                .environmentObject(appData)
+               
+            // Display the DirectoryView as the second tab
+            DirectoryView()
+                .navigationBarTitle("Directory", displayMode: .automatic)
+                .tabItem {
+                    Image(systemName: "magnifyingglass")
+                    Text("Directory")
+                }
+                .tag(1)
+                .environmentObject(appData)
+               
+            // Display the ForumView as the third tab
+            ForumView()
+                .navigationBarTitle("Forum", displayMode: .automatic)
+                .tabItem {
+                    Image(systemName: "bubble.left.and.bubble.right")
+                    Text("Forum")
+                }
+                .tag(2)
+                .environmentObject(appData)
+               
+            // Display the SessionsView as the fourth tab
+            SessionsView()
+                .navigationBarTitle("Sessions", displayMode: .automatic)
+                .tabItem {
+                    Image(systemName: "book")
+                    Text("Sessions")
+                }
+                .tag(3)
+                .environmentObject(appData)
+               
+            // Display the ProfileView as the fifth tab
+            ProfileView()
+                .navigationBarTitle("Me", displayMode: .automatic)
+                .tabItem {
+                    Image(systemName: "person.crop.circle")
+                    Text("Me")
+                }
+                .tag(4)
+                .environmentObject(appData)
         }
+        .environmentObject(appData)
     }
 }
 
 struct LoginPage: View {
     @EnvironmentObject var authStateDelegate: AuthStateDelegate
+    
+//    // Log out button
+//    Button(action: {
+//        // Log out the user and set the isAuthenticated variable to false
+//        try? Auth.auth().signOut()
+//    }, label: {
+//        Text("Log Out")
+//    })
     
     var body: some View {
         VStack {
