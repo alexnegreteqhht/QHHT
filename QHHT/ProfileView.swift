@@ -1,4 +1,5 @@
 import SwiftUI
+import Firebase
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
@@ -11,22 +12,64 @@ struct ProfileView_Previews: PreviewProvider {
 struct ProfileView: View {
     // Get the instance of AppData from the environment
     @EnvironmentObject var appData: AppData
+    @State private var showEditProfile = false
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                // Placeholder text
-                Text("My Profile")
-                    .font(.body)
-                    .foregroundColor(.primary)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
+            NavigationView {
+                GeometryReader { geometry in
+                    ScrollView {
+                        VStack(alignment: .center, spacing: 20) {
+                            // Profile picture
+                            Image(systemName: "person.crop.circle.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 150, height: 150)
+                                .foregroundColor(.gray)
+                            
+                            // User name
+                            Text("Alex Negrete")
+                                .font(.title)
+                                .fontWeight(.bold)
+                            
+                            // Bio
+                            Text("Hi everyone! My name is Alex and I created this app. I'm a fan of Delores Cannon's work. I started practicing QHHT & BQH in 2023. I'm excited to meet you all.")
+                                .font(.callout)
+                                .foregroundColor(.gray)
+                            
+                            // Edit profile button
+                            Button(action: {
+                                showEditProfile.toggle()
+                            }) {
+                                Text("Edit Profile")
+                                    .frame(minWidth: 0, maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            }
+                            .padding(.horizontal, 20)
+                            .sheet(isPresented: $showEditProfile) {
+                                // Replace with your EditProfileView()
+                                Text("Edit Profile View")
+                            }
+                            
+                            // Log out button
+                            Button(action: {
+                                // Log out the user and set the isAuthenticated variable to false
+                                try? Auth.auth().signOut()
+                            }, label: {
+                                Text("Log Out")
+                            })
+                            
+                            Spacer()
+                        }
+                        .padding(.top, 50)
+                                        .padding(.horizontal, geometry.size.width * 0.05) // Apply 5% padding of screen width
+                        .navigationBarTitle("Profile", displayMode: .large)
+                    }
                 }
             }
-            .navigationBarTitle("Profile")
         }
-    }
 }
 
 

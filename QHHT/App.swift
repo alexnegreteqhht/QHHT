@@ -131,14 +131,6 @@ struct ContentView: View {
 struct LoginPage: View {
     @EnvironmentObject var authStateDelegate: AuthStateDelegate
     
-//    // Log out button
-//    Button(action: {
-//        // Log out the user and set the isAuthenticated variable to false
-//        try? Auth.auth().signOut()
-//    }, label: {
-//        Text("Log Out")
-//    })
-    
     var body: some View {
         VStack {
             Text("QHHT-BQH")

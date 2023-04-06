@@ -17,7 +17,7 @@ struct DirectoryView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                 // Placeholder text
-                Text("Practitioner Directory")
+                Text("Find a practitioner near you")
                     .font(.body)
                     .foregroundColor(.primary)
                     .padding(.horizontal, 20)

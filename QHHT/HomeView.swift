@@ -17,7 +17,7 @@ struct HomeView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                 // Placeholder text
-                Text("Home Page")
+                Text("New content daily")
                     .font(.body)
                     .foregroundColor(.primary)
                     .padding(.horizontal, 20)

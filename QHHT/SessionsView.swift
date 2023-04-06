@@ -17,7 +17,7 @@ struct SessionsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                 // Placeholder text
-                Text("My Session Notes and Stories")
+                Text("Keep track of your progress")
                     .font(.body)
                     .foregroundColor(.primary)
                     .padding(.horizontal, 20)

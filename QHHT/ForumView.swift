@@ -17,7 +17,7 @@ struct ForumView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                 // Placeholder text
-                Text("QHHT & BQH Practitioner and Client Forums")
+                Text("Get to know the community")
                     .font(.body)
                     .foregroundColor(.primary)
                     .padding(.horizontal, 20)
