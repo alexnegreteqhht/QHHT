@@ -1,5 +1,8 @@
 import SwiftUI
 import Firebase
+import FirebaseFirestore
+import Combine
+import FirebaseAppCheck
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
@@ -12,176 +15,93 @@ struct ProfileView_Previews: PreviewProvider {
 struct ProfileView: View {
     // Get the instance of AppData from the environment
     @EnvironmentObject var appData: AppData
+    @ObservedObject var userProfile = UserProfile()
     @State private var showEditProfile = false
     
-    var body: some View {
-            NavigationView {
-                GeometryReader { geometry in
-                    ScrollView {
-                        VStack(alignment: .center, spacing: 20) {
-                            // Profile picture
-                            Image(systemName: "person.crop.circle.fill")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 150, height: 150)
-                                .foregroundColor(.gray)
-                            
-                            // User name
-                            Text("Alex Negrete")
-                                .font(.title)
-                                .fontWeight(.bold)
-                            
-                            // Bio
-                            Text("Hi everyone! My name is Alex and I created this app. I'm a fan of Delores Cannon's work. I started practicing QHHT & BQH in 2023. I'm excited to meet you all.")
-                                .font(.callout)
-                                .foregroundColor(.gray)
-                            
-                            // Edit profile button
-                            Button(action: {
-                                showEditProfile.toggle()
-                            }) {
-                                Text("Edit Profile")
-                                    .frame(minWidth: 0, maxWidth: .infinity)
-                                    .padding()
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(10)
-                            }
-                            .padding(.horizontal, 20)
-                            .sheet(isPresented: $showEditProfile) {
-                                // Replace with your EditProfileView()
-                                Text("Edit Profile View")
-                            }
-                            
-                            // Log out button
-                            Button(action: {
-                                // Log out the user and set the isAuthenticated variable to false
-                                try? Auth.auth().signOut()
-                            }, label: {
-                                Text("Log Out")
-                            })
-                            
-                            Spacer()
-                        }
-                        .padding(.top, 50)
-                                        .padding(.horizontal, geometry.size.width * 0.05) // Apply 5% padding of screen width
-                        .navigationBarTitle("Profile", displayMode: .large)
-                    }
+    // Fetch user data from Firebase
+    func fetchUserData() {
+        if let user = Auth.auth().currentUser {
+            
+            let db = Firestore.firestore()
+            let docRef = db.collection("users").document(user.uid)
+            
+            docRef.getDocument { (document, error) in
+                if let document = document, document.exists {
+                    self.userProfile.name = document.get("fullName") as? String ?? "No Name"
+                    self.userProfile.email = document.get("emailAddress") as? String ?? "No Email"
+                    self.userProfile.location = document.get("location") as? String ?? "No Location"
+                    self.userProfile.userName = document.get("userName") as? String ?? "No User Name"
+                    self.userProfile.userEmail = document.get("userName") as? String ?? "No User Email"
+                    self.userProfile.userLocation = document.get("userName") as? String ?? "No User Location"
+                    self.userProfile.userPhoneNumber = document.get("phoneNumber") as? String ?? "No User Phone Number"
+                    self.userProfile.userBio = document.get("bio") as? String ?? "No User Bio"
+                    self.userProfile.userType = document.get("userType") as? String ?? "No User Type"
+                    self.userProfile.userCredentials = document.get("credentials") as? String ?? "No User Credentials"
+                    self.userProfile.userPhotoURL = document.get("userPhotoURL") as? String ?? "No Photo URL"
+                } else {
+                    print("Document does not exist.")
                 }
             }
         }
+    }
+    
+    var body: some View {
+        NavigationView {
+            GeometryReader { geometry in
+                ScrollView {
+                    VStack(alignment: .center, spacing: 20) {
+                        // Profile picture
+                        Image(systemName: "person.crop.circle.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 150, height: 150)
+                            .foregroundColor(.gray)
+                        
+                        // User name
+                        Text(userProfile.userName)
+                        .font(.title)
+                        .fontWeight(.bold)
+                        
+                        // Bio
+//                            Text("Hi everyone! My name is Alex and I created this app. I'm a fan of Delores Cannon's work. I started practicing QHHT & BQH in 2023. I'm excited to meet you all.")
+                        Text(userProfile.userBio)
+                        .font(.callout)
+                        .foregroundColor(.gray)
+                        
+                        // Edit profile button
+                        Button(action: {
+                            showEditProfile.toggle()
+                        }) {
+                            Text("Edit Profile")
+                                .frame(minWidth: 0, maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                        .padding(.horizontal, 20)
+                        .sheet(isPresented: $showEditProfile) {
+                            EditProfileView(userProfile: userProfile)
+                        }
+                        
+                        // Log out button
+                        Button(action: {
+                            // Log out the user and set the isAuthenticated variable to false
+                            try? Auth.auth().signOut()
+                        }, label: {
+                            Text("Log Out")
+                        })
+                        
+                        Spacer()
+                    }
+                    .padding(.top, 50)
+                                    .padding(.horizontal, geometry.size.width * 0.05) // Apply 5% padding of screen width
+                    .navigationBarTitle("Profile", displayMode: .large)
+                }
+            }
+        }
+        
+        // Fetch user data when the view appears
+        .onAppear(perform: fetchUserData)
+    }
 }
-
-
-//import SwiftUI
-//
-//struct ContactView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        ContactView()
-//        .environmentObject(AppData())
-//    }
-//}
-//
-//// View for the Contact tab
-//struct ContactView: View {
-//    // Get the instance of AppData from the environment
-//    @EnvironmentObject var appData: AppData
-//
-//    var body: some View {
-//        NavigationView {
-//            ScrollView {
-//                VStack(alignment: .leading, spacing: 16) {
-//                    // Placeholder text
-//                    Text("Phone: \(appData.contactInfo.phone)")
-//                        .font(.body)
-//                        .foregroundColor(Color.primary)
-//                        .padding(.horizontal, 20)
-//                    Text("Email: \(appData.contactInfo.email)")
-//                        .font(.body)
-//                        .foregroundColor(Color.primary)
-//                        .padding(.horizontal, 20)
-//                    Text("Address: \(appData.contactInfo.address)")
-//                        .font(.body)
-//                        .foregroundColor(Color.primary)
-//                        .padding(.horizontal, 20)
-//                    Text("Website: \(appData.contactInfo.website)")
-//                        .font(.body)
-//                        .foregroundColor(Color.black)
-//                        .padding(.horizontal, 20)
-//                    Text("Facebook: \(appData.contactInfo.facebook)")
-//                        .font(.body)
-//                        .foregroundColor(Color.black)
-//                        .padding(.horizontal, 20)
-//                    Text("Instagram: \(appData.contactInfo.instagram)")
-//                        .font(.body)
-//                        .foregroundColor(Color.black)
-//                        .padding(.horizontal, 20)
-//                }
-//            }
-//            .navigationBarTitle("Contact")
-//        }
-//    }
-//}
-//
-//
-//////
-//////  ContactView.swift
-//////  QHHT
-//////
-//////  Created by Alex Negrete on 3/24/23.
-//////
-////
-////import SwiftUI
-////
-////struct ContactView_Previews: PreviewProvider {
-//////    static var previews: some View {
-//////        ContactView()
-//////            .environmentObject(AppData())
-//////    }
-//////}
-//////
-//////struct ContactView: View {
-//////    @EnvironmentObject var appData: AppData
-//////
-////    var body: some View {
-////        VStack {
-////            Spacer(minLength: 20)
-////            ScrollView {
-////                VStack(alignment: .leading, spacing: 16) {
-////                    VStack(alignment: .leading, spacing: 8) {
-////                        Text("Phone: \(appData.contactInfo.phone)")
-////                            .font(.body)
-////                            .foregroundColor(Color.primary)
-////                            .padding(.horizontal, 20)
-////                        Text("Email: \(appData.contactInfo.email)")
-////                            .font(.body)
-////                            .foregroundColor(Color.primary)
-////                            .padding(.horizontal, 20)
-////                        Text("Address: \(appData.contactInfo.address)")
-////                            .font(.body)
-////                            .foregroundColor(Color.primary)
-////                            .padding(.horizontal, 20)
-////                    }
-////                    .padding(.bottom, 20)
-////
-////                    VStack(alignment: .leading, spacing: 8) {
-////                        Text("Website: \(appData.contactInfo.website)")
-////                            .font(.body)
-////                            .foregroundColor(Color.black)
-////                            .padding(.horizontal, 20)
-////                        Text("Facebook: \(appData.contactInfo.facebook)")
-////                            .font(.body)
-////                            .foregroundColor(Color.black)
-////                            .padding(.horizontal, 20)
-////                        Text("Instagram: \(appData.contactInfo.instagram)")
-////                            .font(.body)
-////                            .foregroundColor(Color.black)
-////                            .padding(.horizontal, 20)
-////                    }
-////                }
-////                .padding(.top, 30)
-//////                .edgesIgnoringSafeArea(.bottom)
-//////            }
-//////        }
-//////    }
-//////}

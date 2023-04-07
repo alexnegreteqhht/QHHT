@@ -35,6 +35,7 @@
 		5D44C50329DD301E004EEDF2 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 5D44C50229DD301E004EEDF2 /* FirebaseStorage */; };
 		5D44C50529DD301E004EEDF2 /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 5D44C50429DD301E004EEDF2 /* FirebaseStorageCombine-Community */; };
 		5D45368829CED73A00BB11AD /* DataStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D45368729CED73A00BB11AD /* DataStruct.swift */; };
+		5D93134629DE9E8E001B5E6E /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D93134529DE9E8E001B5E6E /* EditProfileView.swift */; };
 		5DDDD7FB29CE873B00572BE0 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD7FA29CE873B00572BE0 /* App.swift */; };
 		5DDDD7FF29CE873C00572BE0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DDDD7FE29CE873C00572BE0 /* Assets.xcassets */; };
 		5DDDD80329CE873C00572BE0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DDDD80229CE873C00572BE0 /* Preview Assets.xcassets */; };
@@ -50,6 +51,7 @@
 
 /* Begin PBXFileReference section */
 		5D45368729CED73A00BB11AD /* DataStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStruct.swift; sourceTree = "<group>"; };
+		5D93134529DE9E8E001B5E6E /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
 		5DDDD7F729CE873B00572BE0 /* QHHT-BQH.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "QHHT-BQH.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DDDD7FA29CE873B00572BE0 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		5DDDD7FE29CE873C00572BE0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 				5DDDD80D29CE941000572BE0 /* ForumView.swift */,
 				5DDDD80F29CE943100572BE0 /* SessionsView.swift */,
 				5DDDD81129CE945100572BE0 /* ProfileView.swift */,
+				5D93134529DE9E8E001B5E6E /* EditProfileView.swift */,
 				5DDDD7FE29CE873C00572BE0 /* Assets.xcassets */,
 				5DDDD80029CE873C00572BE0 /* QHHT.entitlements */,
 				5DF7FB7D29DD2C040011127B /* GoogleService-Info.plist */,
@@ -258,6 +261,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5D93134629DE9E8E001B5E6E /* EditProfileView.swift in Sources */,
 				5D45368829CED73A00BB11AD /* DataStruct.swift in Sources */,
 				5DDDD81729CE9FA500572BE0 /* ImageHandler.swift in Sources */,
 				5DDDD80E29CE941000572BE0 /* ForumView.swift in Sources */,
