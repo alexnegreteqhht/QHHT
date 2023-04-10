@@ -152,5 +152,16 @@ struct ProfileView: View {
         
         // Fetch user data when the view appears
         .onAppear(perform: fetchUserData)
+        
+        // In ProfileView
+        .onChange(of: userProfile.profileImageURL) { _ in
+            refreshProfileImage()
+        }
+    }
+    
+    func refreshProfileImage() {
+        loadImageFromURL(urlString: userProfile.userProfileImage ?? "") { image in
+            userPhoto = image
+        }
     }
 }

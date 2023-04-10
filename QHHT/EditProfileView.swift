@@ -140,11 +140,7 @@ struct EditProfileView: View {
                 }
 
                 if let profileImageURL = userProfile.userProfileImage {
-                    loadImageFromURL(urlString: profileImageURL) { image in
-                        if let image = image {
-                            userPhoto = image
-                        }
-                    }
+                    userProfile.profileImageURL = profileImageURL // Set the @Published property
                 }
 
                 presentationMode.wrappedValue.dismiss()
@@ -166,7 +162,6 @@ struct EditProfileView: View {
                                     .scaledToFill()
                                     .frame(width: 150, height: 150)
                                     .clipShape(Circle())
-//                                    .clipped()
                             } else {
                                 Image(systemName: "person.crop.circle.fill.badge.plus")
                                     .resizable()
