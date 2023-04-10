@@ -31,6 +31,8 @@ struct EditProfileView: View {
     @State private var showCredentialImagePicker = false
     @State private var showDatePicker = false
     @State private var isBirthdaySet: Bool = false
+    var onProfilePhotoUpdated: ((UIImage) -> Void)?
+
     
     func saveProfile() {
         if let user = Auth.auth().currentUser {
@@ -111,6 +113,12 @@ struct EditProfileView: View {
     }
 
     func updateUserProfile(userRef: DocumentReference) {
+        if let profileImageURL = userProfile.userProfileImage {
+            userProfile.profileImageURL = profileImageURL // Set the @Published property
+            onProfilePhotoUpdated?(userPhoto!) // Call the closure with the updated userPhoto
+        }
+        presentationMode.wrappedValue.dismiss()
+
         userRef.updateData([
             "name": userProfile.name,
             "email": userProfile.email,

@@ -120,8 +120,11 @@ struct ProfileView: View {
                         }
                         .padding(.horizontal, 20)
                         .sheet(isPresented: $showEditProfile) {
-                            EditProfileView(userProfile: userProfile, userPhoto: userPhoto)
+                            EditProfileView(userProfile: userProfile, onProfilePhotoUpdated: { updatedUserPhoto in
+                                userPhoto = updatedUserPhoto
+                            })
                         }
+
 
                         Button(action: {
                             showSettings.toggle()
