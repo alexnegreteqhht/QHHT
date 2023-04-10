@@ -20,7 +20,7 @@ let dateFormatter: DateFormatter = {
 
 struct EditProfileView: View {
     @ObservedObject var userProfile: UserProfile
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.presentationMode) private var presentationMode
     @State var userPhoto: UIImage? = nil
     @State private var userPhotoData: Data? = nil
     @State private var showImagePicker: Bool = false
@@ -30,9 +30,8 @@ struct EditProfileView: View {
     @State private var credentialImageData: Data?
     @State private var showCredentialImagePicker = false
     @State private var showDatePicker = false
-    @State private var isBirthdaySet: Bool = false
+    @State private var isBirthdaySet = false
     var onProfilePhotoUpdated: ((UIImage) -> Void)?
-
     
     func saveProfile() {
         if let user = Auth.auth().currentUser {
@@ -97,28 +96,25 @@ struct EditProfileView: View {
     }
     
     func loadImageFromURL(urlString: String, completion: @escaping (UIImage?) -> Void) {
-        if let url = URL(string: urlString) {
-            URLSession.shared.dataTask(with: url) { data, response, error in
-                if let data = data, let image = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        completion(image)
-                    }
-                } else {
+        guard let url = URL(string: urlString) else {
+            completion(nil)
+            return
+        }
+
+        URLSession.shared.dataTask(with: url) { data, _, _ in
+            if let data = data, let image = UIImage(data: data) {
+                DispatchQueue.main.async {
+                    completion(image)
+                }
+            } else {
+                DispatchQueue.main.async {
                     completion(nil)
                 }
-            }.resume()
-        } else {
-            completion(nil)
-        }
+            }
+        }.resume()
     }
 
     func updateUserProfile(userRef: DocumentReference) {
-        if let profileImageURL = userProfile.userProfileImage {
-            userProfile.profileImageURL = profileImageURL // Set the @Published property
-            onProfilePhotoUpdated?(userPhoto!) // Call the closure with the updated userPhoto
-        }
-        presentationMode.wrappedValue.dismiss()
-
         userRef.updateData([
             "name": userProfile.name,
             "email": userProfile.email,
@@ -150,8 +146,6 @@ struct EditProfileView: View {
                 if let profileImageURL = userProfile.userProfileImage {
                     userProfile.profileImageURL = profileImageURL // Set the @Published property
                 }
-
-                presentationMode.wrappedValue.dismiss()
             }
         }
     }
@@ -365,7 +359,15 @@ struct EditProfileView: View {
                     },
                 trailing:
                     Button("Save") {
+                        if let profileImageURL = userProfile.userProfileImage {
+                            userProfile.profileImageURL = profileImageURL
+                        }
+                        
+                        presentationMode.wrappedValue.dismiss()
                         saveProfile()
+                        if let userPhoto = userPhoto, let onUpdate = onProfilePhotoUpdated {
+                            onUpdate(userPhoto)
+                        }
                     }
             )
             .alert(isPresented: $showAlert) {
@@ -373,15 +375,16 @@ struct EditProfileView: View {
             }
             
             .onAppear {
+
+
                 loadImageFromURL(urlString: userProfile.userCredential ?? "") { image in
                     if let image = image {
                         credentialImage = image
                     }
-                }
-
-                loadImageFromURL(urlString: userProfile.userProfileImage ?? "") { image in
-                    if let image = image {
-                        userPhoto = image
+                    loadImageFromURL(urlString: userProfile.userProfileImage ?? "") { image in
+                        if let image = image {
+                            userPhoto = image
+                        }
                     }
                 }
             }
@@ -392,10 +395,10 @@ struct EditProfileView: View {
 struct ImagePicker: UIViewControllerRepresentable {
     @Binding var selectedImage: UIImage?
     @Binding var imageData: Data?
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.presentationMode) private var presentationMode
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(self)
+        Coordinator(self, imageData: $imageData)
     }
 
     func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> UIImagePickerController {
@@ -410,17 +413,20 @@ struct ImagePicker: UIViewControllerRepresentable {
 
     class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
         let parent: ImagePicker
+        @Binding var imageData: Data?
 
-        init(_ parent: ImagePicker) {
+        init(_ parent: ImagePicker, imageData: Binding<Data?>) {
             self.parent = parent
+            _imageData = imageData
         }
 
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-            if let uiImage = info[.originalImage] as? UIImage {
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            if let uiImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
                 parent.selectedImage = uiImage
-                parent.imageData = uiImage.jpegData(compressionQuality: 1.0)
+                if let data = uiImage.jpegData(compressionQuality: 1.0) {
+                    imageData = data
+                }
             }
-
             parent.presentationMode.wrappedValue.dismiss()
         }
     }

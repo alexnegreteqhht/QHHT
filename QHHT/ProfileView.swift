@@ -2,7 +2,6 @@ import SwiftUI
 import Firebase
 import FirebaseFirestore
 import Combine
-import FirebaseAppCheck
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
@@ -17,6 +16,14 @@ struct ProfileView: View {
     @State private var showEditProfile = false
     @State private var showSettings = false
     @State private var userPhoto: UIImage? = nil
+    @State private var tempProfileImage: UIImage? = nil
+    
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter
+    }()
     
     func loadImageFromURL(urlString: String, completion: @escaping (UIImage?) -> Void) {
         if let url = URL(string: urlString) {
@@ -85,19 +92,28 @@ struct ProfileView: View {
             GeometryReader { geometry in
                 ScrollView {
                     VStack(alignment: .center, spacing: 20) {
-                        if userProfile.userProfileImage != "" {
-                            Image(uiImage: userPhoto ?? UIImage())
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 150, height: 150)
-                            .foregroundColor(.gray)
-                            .clipShape(Circle())
+                        
+                        if let tempImage = tempProfileImage {
+                            Image(uiImage: tempImage)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 150, height: 150)
+                                .clipShape(Circle())
                         } else {
-                            Image(systemName: "person.crop.circle.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 150, height: 150)
-                            .foregroundColor(.gray)
+                            if userProfile.userProfileImage != "" {
+                                Image(uiImage: userPhoto ?? UIImage())
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 150, height: 150)
+                                .foregroundColor(.gray)
+                                .clipShape(Circle())
+                            } else {
+                                Image(systemName: "person.crop.circle.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 150, height: 150)
+                                .foregroundColor(.gray)
+                            }
                         }
                         
                         Text(userProfile.userName)
@@ -120,8 +136,8 @@ struct ProfileView: View {
                         }
                         .padding(.horizontal, 20)
                         .sheet(isPresented: $showEditProfile) {
-                            EditProfileView(userProfile: userProfile, onProfilePhotoUpdated: { updatedUserPhoto in
-                                userPhoto = updatedUserPhoto
+                            EditProfileView(userProfile: userProfile, onProfilePhotoUpdated: { newImage in
+                                tempProfileImage = newImage
                             })
                         }
 
