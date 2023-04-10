@@ -2,6 +2,7 @@ import SwiftUI
 import AuthenticationServices
 import Firebase
 import FirebaseAppCheck
+import FirebaseAuth
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
@@ -140,23 +141,25 @@ struct LoginPage: View {
                         }
 
                         if let user = authResult?.user {
-                            let name = (appleIDCredential.fullName?.givenName ?? "") + " " + (appleIDCredential.fullName?.familyName ?? "")
-                            let email = appleIDCredential.email ?? ""
-                            let location = ""
-                            let userName = name
-                            let userEmail = email
-                            let userLocation = ""
-                            let userPhoneNumber = ""
-                            let userBio = ""
-                            let userType = ""
-                            let userCredentials = ""
-                            let userPhotoURL = ""
-
                             checkIfUserExists(uid: user.uid) { exists in
                                 if exists {
                                     print("User document already exists.")
                                 } else {
-                                    createUserDocument(uid: user.uid, name: name, email: email, location: location, userName: userName, userEmail: userEmail, userLocation: userLocation, userPhoneNumber: userPhoneNumber, userBio: userBio, userType: userType, userCredentials: userCredentials, userPhotoURL: userPhotoURL)
+                                    let name = (appleIDCredential.fullName?.givenName ?? "") + " " + (appleIDCredential.fullName?.familyName ?? "")
+                                    let email = appleIDCredential.email ?? ""
+                                    let location = ""
+                                    let userName = name
+                                    let userEmail = email
+                                    let userLocation = ""
+                                    let userPhoneNumber = ""
+                                    let userBio = ""
+                                    let userVerification = ""
+                                    let userCredential = ""
+                                    let userProfileImage = ""
+                                    let userBirthday = Date()
+                                    let userWebsite = ""
+                                    let userJoined = Date()
+                                    createUserDocument(uid: user.uid, name: name, email: email, location: location, userName: userName, userEmail: userEmail, userLocation: userLocation, userPhoneNumber: userPhoneNumber, userBio: userBio, userVerification: userVerification, userCredential: userCredential, userProfileImage: userProfileImage, userBirthday: userBirthday, userWebsite: userWebsite, userJoined: userJoined)
                                 }
                             }
                         }
@@ -237,7 +240,7 @@ func checkIfUserExists(uid: String, completion: @escaping (Bool) -> Void) {
     }
 }
 
-func createUserDocument(uid: String, name: String, email: String, location: String, userName: String, userEmail: String, userLocation: String, userPhoneNumber: String, userBio: String, userType: String, userCredentials: String, userPhotoURL: String) {
+func createUserDocument(uid: String, name: String, email: String, location: String, userName: String, userEmail: String, userLocation: String, userPhoneNumber: String, userBio: String, userVerification: String, userCredential: String, userProfileImage: String, userBirthday: Date, userWebsite: String, userJoined: Date) {
     if let user = Auth.auth().currentUser {
         let db = Firestore.firestore()
         let userDocRef = db.collection("users").document(user.uid)
@@ -252,9 +255,12 @@ func createUserDocument(uid: String, name: String, email: String, location: Stri
             "userLocation": userLocation,
             "userPhoneNumber": userPhoneNumber,
             "userBio": userBio,
-            "userType": userType,
-            "userCredentials": userCredentials,
-            "userPhotoURL": userPhotoURL
+            "userVerification": userVerification,
+            "userCredential": userCredential,
+            "userProfileImage": userProfileImage,
+            "userBirthday": userBirthday,
+            "userWebsite": userWebsite,
+            "userJoined": userJoined
         ]) { error in
             if let error = error {
                 print("Error creating or updating user document: \(error)")

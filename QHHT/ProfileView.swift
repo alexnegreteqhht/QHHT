@@ -17,6 +17,24 @@ struct ProfileView: View {
     @EnvironmentObject var appData: AppData
     @ObservedObject var userProfile = UserProfile()
     @State private var showEditProfile = false
+    @State private var showSettings = false
+    @State private var userPhoto: UIImage? = nil
+    
+    func loadImageFromURL(urlString: String, completion: @escaping (UIImage?) -> Void) {
+        if let url = URL(string: urlString) {
+            URLSession.shared.dataTask(with: url) { data, response, error in
+                if let data = data, let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        completion(image)
+                    }
+                } else {
+                    completion(nil)
+                }
+            }.resume()
+        } else {
+            completion(nil)
+        }
+    }
     
     // Fetch user data from Firebase
     func fetchUserData() {
@@ -27,17 +45,37 @@ struct ProfileView: View {
             
             docRef.getDocument { (document, error) in
                 if let document = document, document.exists {
-                    self.userProfile.name = document.get("fullName") as? String ?? "No Name"
-                    self.userProfile.email = document.get("emailAddress") as? String ?? "No Email"
-                    self.userProfile.location = document.get("location") as? String ?? "No Location"
-                    self.userProfile.userName = document.get("userName") as? String ?? "No User Name"
-                    self.userProfile.userEmail = document.get("userName") as? String ?? "No User Email"
-                    self.userProfile.userLocation = document.get("userName") as? String ?? "No User Location"
-                    self.userProfile.userPhoneNumber = document.get("phoneNumber") as? String ?? "No User Phone Number"
-                    self.userProfile.userBio = document.get("bio") as? String ?? "No User Bio"
-                    self.userProfile.userType = document.get("userType") as? String ?? "No User Type"
-                    self.userProfile.userCredentials = document.get("credentials") as? String ?? "No User Credentials"
-                    self.userProfile.userPhotoURL = document.get("userPhotoURL") as? String ?? "No Photo URL"
+                    self.userProfile.name = document.get("name") as? String ?? ""
+                    self.userProfile.email = document.get("email") as? String ?? ""
+                    self.userProfile.location = document.get("location") as? String ?? ""
+                    self.userProfile.userName = document.get("userName") as? String ?? ""
+                    self.userProfile.userEmail = document.get("userEmail") as? String ?? ""
+                    self.userProfile.userLocation = document.get("userLocation") as? String ?? ""
+                    self.userProfile.userPhoneNumber = document.get("userPhoneNumber") as? String ?? ""
+                    self.userProfile.userBio = document.get("userBio") as? String ?? ""
+                    self.userProfile.userVerification = document.get("userVerification") as? String ?? ""
+                    self.userProfile.userCredential = document.get("userCredential") as? String ?? ""
+                    self.userProfile.userProfileImage = document.get("userProfileImage") as? String ?? ""
+                    self.userProfile.userWebsite = document.get("userWebsite") as? String ?? ""
+
+                    if let userBirthdayString = document.get("userBirthday") as? String,
+                       let userBirthday = dateFormatter.date(from: userBirthdayString) {
+                        self.userProfile.userBirthday = userBirthday
+                    } else {
+                        self.userProfile.userBirthday = Date()
+                    }
+                    
+                    if let userJoinedString = document.get("userJoined") as? String,
+                       let userJoined = dateFormatter.date(from: userJoinedString) {
+                        self.userProfile.userJoined = userJoined
+                    } else {
+                        self.userProfile.userJoined = Date()
+                    }
+                    
+                    loadImageFromURL(urlString: self.userProfile.userProfileImage ?? "") { image in
+                        userPhoto = image
+                    }
+                    
                 } else {
                     print("Document does not exist.")
                 }
@@ -50,12 +88,20 @@ struct ProfileView: View {
             GeometryReader { geometry in
                 ScrollView {
                     VStack(alignment: .center, spacing: 20) {
-                        // Profile picture
-                        Image(systemName: "person.crop.circle.fill")
+                        if userProfile.userProfileImage != "" {
+                            Image(uiImage: userPhoto ?? UIImage())
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 150, height: 150)
+                            .foregroundColor(.gray)
+                            .clipShape(Circle())
+                        } else {
+                            Image(systemName: "person.crop.circle.fill")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 150, height: 150)
                             .foregroundColor(.gray)
+                        }
                         
                         // User name
                         Text(userProfile.userName)
@@ -84,13 +130,16 @@ struct ProfileView: View {
                             EditProfileView(userProfile: userProfile)
                         }
                         
-                        // Log out button
+                        // Edit profile button
                         Button(action: {
-                            // Log out the user and set the isAuthenticated variable to false
-                            try? Auth.auth().signOut()
-                        }, label: {
-                            Text("Log Out")
-                        })
+                            showSettings.toggle()
+                        }) {
+                            Text("Settings")
+                        }
+                        .padding(.horizontal, 20)
+                        .sheet(isPresented: $showSettings) {
+                            SettingsView(userProfile: userProfile)
+                        }
                         
                         Spacer()
                     }

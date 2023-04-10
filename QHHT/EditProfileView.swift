@@ -1,5 +1,22 @@
 import SwiftUI
 import Firebase
+import FirebaseAuth
+import FirebaseStorage
+import FirebaseAppCheck
+import FirebaseFirestore
+
+struct EditProfileView_Previews: PreviewProvider {
+    static var previews: some View {
+        EditProfileView(userProfile: UserProfile())
+        .environmentObject(AppData())
+    }
+}
+
+let dateFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "MMM d, yyyy"
+    return formatter
+}()
 
 struct EditProfileView: View {
     @ObservedObject var userProfile: UserProfile
@@ -12,39 +29,132 @@ struct EditProfileView: View {
     @State private var credentialImage: UIImage?
     @State private var credentialImageData: Data?
     @State private var showCredentialImagePicker = false
-
+    @State private var showDatePicker = false
+    @State private var isBirthdaySet: Bool = false
+    
     func saveProfile() {
-        // Save updated profile data to Firestore
-        // Validate and process the data before saving
         if let user = Auth.auth().currentUser {
             let db = Firestore.firestore()
+            let storage = Storage.storage()
             let userRef = db.collection("users").document(user.uid)
             
-            userRef.updateData([
-                "fullName": userProfile.name,
-                "emailAddress": userProfile.email,
-                "location": userProfile.location,
-                "userName": userProfile.userName,
-                "userEmail": userProfile.userEmail,
-                "userLocation": userProfile.userLocation,
-                "phoneNumber": userProfile.userPhoneNumber,
-                "bio": userProfile.userBio,
-                "userType": userProfile.userType,
-                "credentials": userProfile.userCredentials,
-                "userPhotoURL": userProfile.userPhotoURL
-            ]) { error in
-                if let error = error {
-                    errorMessage = "Error updating profile: \(error.localizedDescription)"
-                    showAlert.toggle()
-                } else {
-                    presentationMode.wrappedValue.dismiss()
+            let dispatchGroup = DispatchGroup()
+            
+            if let credentialImageData = credentialImageData {
+                dispatchGroup.enter()
+                let storageRef = storage.reference().child("credentialImages/\(user.uid).jpg")
+                let metadata = StorageMetadata()
+                metadata.contentType = "image/jpeg"
+                
+                storageRef.putData(credentialImageData, metadata: metadata) { metadata, error in
+                    if let error = error {
+                        errorMessage = "Error uploading credential image: \(error.localizedDescription)"
+                        showAlert.toggle()
+                    } else {
+                        storageRef.downloadURL { url, error in
+                            if let error = error {
+                                errorMessage = "Error retrieving credential image URL: \(error.localizedDescription)"
+                                showAlert.toggle()
+                            } else if let url = url {
+                                userProfile.userCredential = url.absoluteString
+                            }
+                            dispatchGroup.leave()
+                        }
+                    }
                 }
+            }
+            
+            if let profileImageData = userPhotoData {
+                dispatchGroup.enter()
+                let storageRef = storage.reference().child("profileImages/\(user.uid).jpg")
+                let metadata = StorageMetadata()
+                metadata.contentType = "image/jpeg"
+                
+                storageRef.putData(profileImageData, metadata: metadata) { metadata, error in
+                    if let error = error {
+                        errorMessage = "Error uploading profile image: \(error.localizedDescription)"
+                        showAlert.toggle()
+                    } else {
+                        storageRef.downloadURL { url, error in
+                            if let error = error {
+                                errorMessage = "Error retrieving profile image URL: \(error.localizedDescription)"
+                                showAlert.toggle()
+                            } else if let url = url {
+                                userProfile.userProfileImage = url.absoluteString
+                            }
+                            dispatchGroup.leave()
+                        }
+                    }
+                }
+            }
+            
+            dispatchGroup.notify(queue: .main) {
+                updateUserProfile(userRef: userRef)
+            }
+        }
+    }
+    
+    func loadImageFromURL(urlString: String, completion: @escaping (UIImage?) -> Void) {
+        if let url = URL(string: urlString) {
+            URLSession.shared.dataTask(with: url) { data, response, error in
+                if let data = data, let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        completion(image)
+                    }
+                } else {
+                    completion(nil)
+                }
+            }.resume()
+        } else {
+            completion(nil)
+        }
+    }
+
+    func updateUserProfile(userRef: DocumentReference) {
+        userRef.updateData([
+            "name": userProfile.name,
+            "email": userProfile.email,
+            "location": userProfile.location,
+            "userName": userProfile.userName,
+            "userEmail": userProfile.userEmail,
+            "userLocation": userProfile.userLocation,
+            "userPhoneNumber": userProfile.userPhoneNumber,
+            "userBio": userProfile.userBio,
+            "userVerification": userProfile.userVerification,
+            "userCredential": userProfile.userCredential ?? "",
+            "userProfileImage": userProfile.userProfileImage ?? "",
+            "userWebsite": userProfile.userWebsite,
+            "userBirthday": dateFormatter.string(from: userProfile.userBirthday),
+            "userJoined": dateFormatter.string(from: userProfile.userJoined)
+        ]) { error in
+            if let error = error {
+                errorMessage = "Error updating profile: \(error.localizedDescription)"
+                showAlert.toggle()
+            } else {
+                if let credentialURL = userProfile.userCredential {
+                    loadImageFromURL(urlString: credentialURL) { image in
+                        if let image = image {
+                            credentialImage = image
+                        }
+                    }
+                }
+
+                if let profileImageURL = userProfile.userProfileImage {
+                    loadImageFromURL(urlString: profileImageURL) { image in
+                        if let image = image {
+                            userPhoto = image
+                        }
+                    }
+                }
+
+                presentationMode.wrappedValue.dismiss()
             }
         }
     }
 
+
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section {
                     HStack {
@@ -53,11 +163,12 @@ struct EditProfileView: View {
                             if let userPhoto = userPhoto {
                                 Image(uiImage: userPhoto)
                                     .resizable()
-                                    .scaledToFit()
+                                    .scaledToFill()
                                     .frame(width: 150, height: 150)
                                     .clipShape(Circle())
+//                                    .clipped()
                             } else {
-                                Image(systemName: "person.crop.circle.fill")
+                                Image(systemName: "person.crop.circle.fill.badge.plus")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 150, height: 150)
@@ -67,13 +178,17 @@ struct EditProfileView: View {
                         .sheet(isPresented: $showImagePicker) {
                             ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
                         }
+
                         Spacer()
                     }
                 }
-                
-                Section(header: Text("Profile Information")) {
-                    TextField("User Name", text: $userProfile.userName)
-                    TextField("User Location", text: $userProfile.userLocation)
+                    Section(header: Text("Profile")) {
+                    TextField("Name", text: $userProfile.userName)
+                        .gesture(
+                            DragGesture().onChanged { _ in
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
+                        )
                     TextEditor(text: $userProfile.userBio)
                         .frame(height: 100)
                         .onChange(of: userProfile.userBio) { newValue in
@@ -81,25 +196,109 @@ struct EditProfileView: View {
                                 userProfile.userBio = String(newValue.prefix(160))
                             }
                         }
+                        .gesture(
+                            DragGesture().onChanged { _ in
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
+                        )
+                    TextField("Location", text: $userProfile.userLocation)
+                        .gesture(
+                            DragGesture().onChanged { _ in
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
+                        )
+                    TextField("Website", text: $userProfile.userWebsite)
+                            .autocapitalization(.none)
+                            .gesture(
+                                DragGesture().onChanged { _ in
+                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                }
+                            )
+                    Button(action: {
+                        showDatePicker.toggle()
+                    }) {
+                        HStack {
+                            Text("Birthday")
+                                .foregroundColor(Color(.label))
+                                .gesture(
+                                    DragGesture().onChanged { _ in
+                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                    }
+                                )
+                            Spacer()
+                            if isBirthdaySet {
+                                Text("\(userProfile.userBirthday, formatter: dateFormatter)")
+                                    .foregroundColor(.gray) // Date text should be gray if birthday is set
+                            } else {
+                                Text("Set Date")
+                                    .foregroundColor(.blue) // "Set Date" text should be blue if birthday is not set
+                            }
+                        }
+                    }
+                    
+                    .onAppear {
+                        // Check if the user's birthday has been set.
+                        isBirthdaySet = !Calendar.current.isDateInToday(userProfile.userBirthday)
+                    }
+                    .onChange(of: userProfile.userBirthday) { _ in
+                        // Update isBirthdaySet when the user selects a birthday.
+                        isBirthdaySet = !Calendar.current.isDateInToday(userProfile.userBirthday)
+                    }
+                    .sheet(isPresented: $showDatePicker) {
+                        VStack {
+                            Text("Select Your Birthday")
+                                .font(.headline)
+                            DatePicker("", selection: $userProfile.userBirthday, displayedComponents: .date)
+                                .datePickerStyle(WheelDatePickerStyle())
+                                .labelsHidden()
+                            Button(action: {
+                                isBirthdaySet = true
+                                showDatePicker = false
+                            }) {
+                                Text("Done")
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            }
+                            .padding(.top)
+                        }
+                        .padding()
+                    }
+                    
                 }
                 
-                Section(header: Text("Contact Information")) {
-                    TextField("User Email", text: $userProfile.userEmail)
-                    TextField("Phone Number", text: $userProfile.userPhoneNumber)
+                Section(header: Text("Contact")) {
+                    TextField("Email", text: $userProfile.userEmail)
+                        .autocapitalization(.none)
+                        .gesture(
+                            DragGesture().onChanged { _ in
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
+                        )
+                    TextField("Phone", text: $userProfile.userPhoneNumber)
+                        .gesture(
+                            DragGesture().onChanged { _ in
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
+                        )
                 }
                 
-                Section(header: Text("Practitioner Verification")) {
-                    if let image = credentialImage {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 150, height: 150)
-                    } else {
-                        Image(systemName: "doc.badge.plus")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 150, height: 150)
-                            .foregroundColor(.gray)
+                Section(header: Text("Verification")) {
+                    Button(action: { showCredentialImagePicker = true }) {
+                        if let credentialImage = credentialImage {
+                            Image(uiImage: credentialImage)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 150, height: 150)
+                                .clipped()
+                        } else {
+                            Image(systemName: "doc.badge.plus")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 150, height: 150)
+                                .foregroundColor(.gray)
+                        }
                     }
 
                     Button(action: {
@@ -111,10 +310,16 @@ struct EditProfileView: View {
                     .sheet(isPresented: $showCredentialImagePicker) {
                         ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
                     }
-
-                    Text("Verification Status: \(userProfile.userType)")
-                        .font(.callout)
-                        .foregroundColor(.gray)
+                    
+                    if userProfile.userVerification != "" {
+                        Text("Status: \(userProfile.userVerification)")
+                            .font(.callout)
+                            .foregroundColor(.gray)
+                    } else {
+                        Text("Earn your verified practitioner badge by uploading an image of your certification. Image must match the name on your account.")
+                            .font(.callout)
+                            .foregroundColor(.gray)
+                    }
                 }
             }
             .navigationBarTitle("Edit Profile", displayMode: .inline)
@@ -130,6 +335,20 @@ struct EditProfileView: View {
             )
             .alert(isPresented: $showAlert) {
                 Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
+            }
+            
+            .onAppear {
+                loadImageFromURL(urlString: userProfile.userCredential ?? "") { image in
+                    if let image = image {
+                        credentialImage = image
+                    }
+                }
+
+                loadImageFromURL(urlString: userProfile.userProfileImage ?? "") { image in
+                    if let image = image {
+                        userPhoto = image
+                    }
+                }
             }
         }
     }
