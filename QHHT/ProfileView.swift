@@ -11,9 +11,7 @@ struct ProfileView_Previews: PreviewProvider {
     }
 }
 
-// View for the About tab
 struct ProfileView: View {
-    // Get the instance of AppData from the environment
     @EnvironmentObject var appData: AppData
     @ObservedObject var userProfile = UserProfile()
     @State private var showEditProfile = false
@@ -36,7 +34,6 @@ struct ProfileView: View {
         }
     }
     
-    // Fetch user data from Firebase
     func fetchUserData() {
         if let user = Auth.auth().currentUser {
             
@@ -103,18 +100,14 @@ struct ProfileView: View {
                             .foregroundColor(.gray)
                         }
                         
-                        // User name
                         Text(userProfile.userName)
                         .font(.title)
                         .fontWeight(.bold)
                         
-                        // Bio
-//                            Text("Hi everyone! My name is Alex and I created this app. I'm a fan of Delores Cannon's work. I started practicing QHHT & BQH in 2023. I'm excited to meet you all.")
                         Text(userProfile.userBio)
                         .font(.callout)
                         .foregroundColor(.gray)
                         
-                        // Edit profile button
                         Button(action: {
                             showEditProfile.toggle()
                         }) {
@@ -127,10 +120,9 @@ struct ProfileView: View {
                         }
                         .padding(.horizontal, 20)
                         .sheet(isPresented: $showEditProfile) {
-                            EditProfileView(userProfile: userProfile)
+                            EditProfileView(userProfile: userProfile, userPhoto: userPhoto)
                         }
-                        
-                        // Edit profile button
+
                         Button(action: {
                             showSettings.toggle()
                         }) {
@@ -150,10 +142,8 @@ struct ProfileView: View {
             }
         }
         
-        // Fetch user data when the view appears
         .onAppear(perform: fetchUserData)
         
-        // In ProfileView
         .onChange(of: userProfile.profileImageURL) { _ in
             refreshProfileImage()
         }

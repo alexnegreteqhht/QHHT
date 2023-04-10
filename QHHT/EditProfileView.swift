@@ -21,7 +21,7 @@ let dateFormatter: DateFormatter = {
 struct EditProfileView: View {
     @ObservedObject var userProfile: UserProfile
     @Environment(\.presentationMode) var presentationMode
-    @State private var userPhoto: UIImage? = nil
+    @State var userPhoto: UIImage? = nil
     @State private var userPhotoData: Data? = nil
     @State private var showImagePicker: Bool = false
     @State private var showAlert: Bool = false
