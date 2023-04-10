@@ -183,13 +183,17 @@ struct EditProfileView: View {
                     }
                 }
                     Section(header: Text("Profile")) {
-                    TextField("Name", text: $userProfile.userName)
+                        TextField("Name", text: $userProfile.userName)
+                        .onChange(of: userProfile.userName) { newValue in
+                            userProfile.userName = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                        }
                         .gesture(
                             DragGesture().onChanged { _ in
                                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                             }
                         )
-                    TextEditor(text: $userProfile.userBio)
+                        
+                        TextEditor(text: $userProfile.userBio)
                         .frame(height: 100)
                         .onChange(of: userProfile.userBio) { newValue in
                             if newValue.count > 160 {
@@ -197,23 +201,45 @@ struct EditProfileView: View {
                             }
                         }
                         .gesture(
-                            DragGesture().onChanged { _ in
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            }
-                        )
-                    TextField("Location", text: $userProfile.userLocation)
-                        .gesture(
-                            DragGesture().onChanged { _ in
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            }
-                        )
-                    TextField("Website", text: $userProfile.userWebsite)
-                            .autocapitalization(.none)
-                            .gesture(
-                                DragGesture().onChanged { _ in
+                            DragGesture()
+                                .onChanged { _ in
                                     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                 }
-                            )
+                        )
+                        .onChange(of: userProfile.userBio) { newValue in
+                            userProfile.userBio = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                        }
+                        .overlay(
+                            Group {
+                                if userProfile.userBio.isEmpty {
+                                    Text("Bio")
+                                        .foregroundColor(Color(.placeholderText))
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                                        .padding(.top, 8)
+                                        .padding(.leading, 4)
+                                }
+                            }
+                        )
+                        
+                    TextField("Location", text: $userProfile.userLocation)
+                    .gesture(
+                        DragGesture().onChanged { _ in
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        }
+                    )
+                    .onChange(of: userProfile.userLocation) { newValue in
+                        userProfile.userLocation = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
+                    TextField("Website", text: $userProfile.userWebsite)
+                    .autocapitalization(.none)
+                    .gesture(
+                        DragGesture().onChanged { _ in
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        }
+                    )
+                    .onChange(of: userProfile.userWebsite) { newValue in
+                        userProfile.userWebsite = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
                     Button(action: {
                         showDatePicker.toggle()
                     }) {
@@ -270,18 +296,24 @@ struct EditProfileView: View {
                 
                 Section(header: Text("Contact")) {
                     TextField("Email", text: $userProfile.userEmail)
-                        .autocapitalization(.none)
-                        .gesture(
-                            DragGesture().onChanged { _ in
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            }
-                        )
+                    .autocapitalization(.none)
+                    .gesture(
+                        DragGesture().onChanged { _ in
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        }
+                    )
+                    .onChange(of: userProfile.userEmail) { newValue in
+                        userProfile.userEmail = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
                     TextField("Phone", text: $userProfile.userPhoneNumber)
-                        .gesture(
-                            DragGesture().onChanged { _ in
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            }
-                        )
+                    .gesture(
+                        DragGesture().onChanged { _ in
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        }
+                    )
+                    .onChange(of: userProfile.userPhoneNumber) { newValue in
+                        userProfile.userPhoneNumber = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
                 }
                 
                 Section(header: Text("Verification")) {

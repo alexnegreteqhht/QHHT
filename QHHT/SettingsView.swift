@@ -46,8 +46,14 @@ struct SettingsView: View {
             Form {
                 Section(header: Text("Account"), footer: Text("Joined: \(joinedDateFormatter.string(from: userProfile.userJoined))")) {
                     TextField("Email", text: $userProfile.userEmail)
-                        .autocapitalization(.none)
+                    .autocapitalization(.none)
+                    .onChange(of: userProfile.userEmail) { newValue in
+                        userProfile.userEmail = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
                     TextField("Phone", text: $userProfile.userPhoneNumber)
+                    .onChange(of: userProfile.userPhoneNumber) { newValue in
+                        userProfile.userPhoneNumber = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
                 }
 
                 // Log out button
