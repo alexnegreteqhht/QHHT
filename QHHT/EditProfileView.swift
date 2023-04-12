@@ -32,7 +32,8 @@ struct EditProfileView: View {
     @State private var showDatePicker = false
     @State private var isBirthdaySet = false
     var onProfilePhotoUpdated: ((UIImage) -> Void)?
-    @State private var isLoadingImage: Bool = false
+    @State private var isLoadingUserPhoto: Bool = false
+    @State private var isLoadingCredentialImage: Bool = false
 
     func saveProfile() {
         if let user = Auth.auth().currentUser {
@@ -124,7 +125,7 @@ struct EditProfileView: View {
                                         .scaledToFill()
                                         .frame(width: 150, height: 150)
                                         .clipShape(Circle())
-                                } else if !isLoadingImage {
+                                } else if !isLoadingUserPhoto {
                                     Image(systemName: "person.crop.circle.fill.badge.plus")
                                         .resizable()
                                         .scaledToFit()
@@ -132,7 +133,7 @@ struct EditProfileView: View {
                                         .foregroundColor(.gray)
                                 }
                                 
-                                if isLoadingImage {
+                                if isLoadingUserPhoto {
                                     ProgressView()
                                         .progressViewStyle(CircularProgressViewStyle(tint: .gray))
                                         .scaleEffect(1.0)
@@ -261,52 +262,34 @@ struct EditProfileView: View {
                     }
                 }
 
-                Section(header: Text("Contact")) {
-                    TextField("Email", text: $userProfile.userEmail)
-                        .autocapitalization(.none)
-                        .gesture(
-                            DragGesture().onChanged { _ in
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            }
-                        )
-                        .onChange(of: userProfile.userEmail) { newValue in
-                            userProfile.userEmail = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                        }
-
-                    TextField("Phone", text: $userProfile.userPhoneNumber)
-                        .gesture(
-                            DragGesture().onChanged { _ in
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            }
-                        )
-                        .onChange(of: userProfile.userPhoneNumber) { newValue in
-                            userProfile.userPhoneNumber = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                        }
-                }
-
                 Section(header: Text("Verification")) {
-                    Button(action: { showCredentialImagePicker = true }) {
-                        if let credentialImage = credentialImage {
-                            Image(uiImage: credentialImage)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 150, height: 150)
-                                .clipped()
-                        } else {
-                            Image(systemName: "doc.badge.plus")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 150, height: 150)
-                                .foregroundColor(.gray)
+                    Button(action: { showCredentialImagePicker.toggle() }) {
+                        ZStack {
+                            if let credentialImage = credentialImage {
+                                Image(uiImage: credentialImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 150, height: 150)
+                                    .clipped()
+                            } else if !isLoadingCredentialImage {
+                                Image(systemName: "doc.badge.plus")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 150, height: 150)
+                                    .foregroundColor(.gray)
+                            }
+                            
+                            if isLoadingCredentialImage {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+                                    .scaleEffect(1.0)
+                                    .frame(width: 150, height: 150)
+                            }
                         }
                     }
+                    Text("Upload Credential Image")
+                        .foregroundColor(.blue)
 
-                    Button(action: {
-                        showCredentialImagePicker = true
-                    }) {
-                        Text("Upload Credential Image")
-                            .foregroundColor(.blue)
-                    }
                     .sheet(isPresented: $showCredentialImagePicker) {
                         ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
                     }
@@ -331,16 +314,28 @@ struct EditProfileView: View {
             })
         }
         .onAppear {
-            isLoadingImage = true
+            isLoadingUserPhoto = true
             if let profileImageURL = userProfile.userProfileImage {
                 FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { image in
                     if let image = image {
                         userPhoto = image
                     }
-                    isLoadingImage = false
+                    isLoadingUserPhoto = false
                 }
             } else {
-                isLoadingImage = false
+                isLoadingUserPhoto = false
+            }
+            
+            isLoadingCredentialImage = true
+            if let credentialImageURL = userProfile.userCredential {
+                FirebaseHelper.loadImageFromURL(urlString: credentialImageURL) { image in
+                    if let image = image {
+                        credentialImage = image
+                    }
+                    isLoadingCredentialImage = false
+                }
+            } else {
+                isLoadingCredentialImage = false
             }
 
             if let credentialImageURL = userProfile.userCredential {
