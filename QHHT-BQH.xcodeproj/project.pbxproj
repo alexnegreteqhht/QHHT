@@ -35,7 +35,10 @@
 		5D44C50329DD301E004EEDF2 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 5D44C50229DD301E004EEDF2 /* FirebaseStorage */; };
 		5D44C50529DD301E004EEDF2 /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 5D44C50429DD301E004EEDF2 /* FirebaseStorageCombine-Community */; };
 		5D63002729E398CF00BF91E9 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D63002629E398CF00BF91E9 /* SettingsView.swift */; };
-		5D93134629DE9E8E001B5E6E /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D93134529DE9E8E001B5E6E /* EditProfileView.swift */; };
+		5D93134629DE9E8E001B5E6E /* EditProfileView2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D93134529DE9E8E001B5E6E /* EditProfileView2.swift */; };
+		5D9F09EC29E5151900B6C666 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5D9F09EB29E5151900B6C666 /* GoogleService-Info.plist */; };
+		5D9F09EE29E51E4100B6C666 /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9F09ED29E51E4100B6C666 /* EditProfileView.swift */; };
+		5D9F09F029E6139800B6C666 /* FirebaseHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9F09EF29E6139800B6C666 /* FirebaseHelper.swift */; };
 		5DDDD7FB29CE873B00572BE0 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD7FA29CE873B00572BE0 /* App.swift */; };
 		5DDDD7FF29CE873C00572BE0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DDDD7FE29CE873C00572BE0 /* Assets.xcassets */; };
 		5DDDD80329CE873C00572BE0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DDDD80229CE873C00572BE0 /* Preview Assets.xcassets */; };
@@ -45,12 +48,15 @@
 		5DDDD81029CE943100572BE0 /* SessionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD80F29CE943100572BE0 /* SessionsView.swift */; };
 		5DDDD81229CE945100572BE0 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD81129CE945100572BE0 /* ProfileView.swift */; };
 		5DDDD81429CE94C200572BE0 /* AppData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD81329CE94C200572BE0 /* AppData.swift */; };
-		5DF7FB7E29DD2C040011127B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5DF7FB7D29DD2C040011127B /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		5D63002629E398CF00BF91E9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		5D93134529DE9E8E001B5E6E /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
+		5D93134529DE9E8E001B5E6E /* EditProfileView2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView2.swift; sourceTree = "<group>"; };
+		5D9F09EB29E5151900B6C666 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../App/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		5D9F09ED29E51E4100B6C666 /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
+		5D9F09EF29E6139800B6C666 /* FirebaseHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseHelper.swift; sourceTree = "<group>"; };
+		5D9F09F129E68CE400B6C666 /* QHHT-BQH-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "QHHT-BQH-Info.plist"; sourceTree = "<group>"; };
 		5DDDD7F729CE873B00572BE0 /* QHHT-BQH.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "QHHT-BQH.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DDDD7FA29CE873B00572BE0 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		5DDDD7FE29CE873C00572BE0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -62,7 +68,6 @@
 		5DDDD80F29CE943100572BE0 /* SessionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsView.swift; sourceTree = "<group>"; };
 		5DDDD81129CE945100572BE0 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		5DDDD81329CE94C200572BE0 /* AppData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppData.swift; sourceTree = "<group>"; };
-		5DF7FB7D29DD2C040011127B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +111,7 @@
 		5DDDD7EE29CE873B00572BE0 = {
 			isa = PBXGroup;
 			children = (
+				5D9F09F129E68CE400B6C666 /* QHHT-BQH-Info.plist */,
 				5DDDD81529CE9F9400572BE0 /* Data */,
 				5DDDD7F929CE873B00572BE0 /* QHHT */,
 				5DDDD7F829CE873B00572BE0 /* Products */,
@@ -129,11 +135,13 @@
 				5DDDD80D29CE941000572BE0 /* ForumView.swift */,
 				5DDDD80F29CE943100572BE0 /* SessionsView.swift */,
 				5DDDD81129CE945100572BE0 /* ProfileView.swift */,
-				5D93134529DE9E8E001B5E6E /* EditProfileView.swift */,
+				5D93134529DE9E8E001B5E6E /* EditProfileView2.swift */,
+				5D9F09ED29E51E4100B6C666 /* EditProfileView.swift */,
+				5D9F09EF29E6139800B6C666 /* FirebaseHelper.swift */,
 				5D63002629E398CF00BF91E9 /* SettingsView.swift */,
 				5DDDD7FE29CE873C00572BE0 /* Assets.xcassets */,
 				5DDDD80029CE873C00572BE0 /* QHHT.entitlements */,
-				5DF7FB7D29DD2C040011127B /* GoogleService-Info.plist */,
+				5D9F09EB29E5151900B6C666 /* GoogleService-Info.plist */,
 				5DDDD80129CE873C00572BE0 /* Preview Content */,
 			);
 			path = QHHT;
@@ -246,8 +254,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5DDDD80329CE873C00572BE0 /* Preview Assets.xcassets in Resources */,
+				5D9F09EC29E5151900B6C666 /* GoogleService-Info.plist in Resources */,
 				5DDDD7FF29CE873C00572BE0 /* Assets.xcassets in Resources */,
-				5DF7FB7E29DD2C040011127B /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,7 +266,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5D93134629DE9E8E001B5E6E /* EditProfileView.swift in Sources */,
+				5D9F09EE29E51E4100B6C666 /* EditProfileView.swift in Sources */,
+				5D93134629DE9E8E001B5E6E /* EditProfileView2.swift in Sources */,
 				5DDDD80E29CE941000572BE0 /* ForumView.swift in Sources */,
 				5DDDD80C29CE93D800572BE0 /* DirectoryView.swift in Sources */,
 				5DDDD81029CE943100572BE0 /* SessionsView.swift in Sources */,
@@ -266,6 +275,7 @@
 				5DDDD81229CE945100572BE0 /* ProfileView.swift in Sources */,
 				5DDDD80A29CE939500572BE0 /* HomeView.swift in Sources */,
 				5DDDD7FB29CE873B00572BE0 /* App.swift in Sources */,
+				5D9F09F029E6139800B6C666 /* FirebaseHelper.swift in Sources */,
 				5D63002729E398CF00BF91E9 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -395,8 +405,10 @@
 				DEVELOPMENT_TEAM = 7C52729FVD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "QHHT-BQH-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "QHHT-BQH";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library to let you choose a profile picture.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -436,8 +448,10 @@
 				DEVELOPMENT_TEAM = 7C52729FVD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "QHHT-BQH-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "QHHT-BQH";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library to let you choose a profile picture.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;

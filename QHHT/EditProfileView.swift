@@ -1,8 +1,8 @@
 import SwiftUI
+import Photos
 import Firebase
 import FirebaseAuth
 import FirebaseStorage
-import FirebaseAppCheck
 import FirebaseFirestore
 
 struct EditProfileView_Previews: PreviewProvider {
@@ -32,86 +32,45 @@ struct EditProfileView: View {
     @State private var showDatePicker = false
     @State private var isBirthdaySet = false
     var onProfilePhotoUpdated: ((UIImage) -> Void)?
-    
+    @State private var isLoadingImage: Bool = false
+
     func saveProfile() {
         if let user = Auth.auth().currentUser {
-            let db = Firestore.firestore()
-            let storage = Storage.storage()
-            let userRef = db.collection("users").document(user.uid)
-            
+            let userRef = Firestore.firestore().collection("users").document(user.uid)
             let dispatchGroup = DispatchGroup()
-            
+
             if let credentialImageData = credentialImageData {
                 dispatchGroup.enter()
-                let storageRef = storage.reference().child("credentialImages/\(user.uid).jpg")
-                let metadata = StorageMetadata()
-                metadata.contentType = "image/jpeg"
-                
-                storageRef.putData(credentialImageData, metadata: metadata) { metadata, error in
-                    if let error = error {
+                FirebaseHelper.uploadImageToStorage(imageData: credentialImageData, imagePath: "credentialImages/\(user.uid).jpg") { result in
+                    switch result {
+                    case .success(let urlString):
+                        userProfile.userCredential = urlString
+                    case .failure(let error):
                         errorMessage = "Error uploading credential image: \(error.localizedDescription)"
                         showAlert.toggle()
-                    } else {
-                        storageRef.downloadURL { url, error in
-                            if let error = error {
-                                errorMessage = "Error retrieving credential image URL: \(error.localizedDescription)"
-                                showAlert.toggle()
-                            } else if let url = url {
-                                userProfile.userCredential = url.absoluteString
-                            }
-                            dispatchGroup.leave()
-                        }
                     }
+                    dispatchGroup.leave()
                 }
             }
-            
+
             if let profileImageData = userPhotoData {
                 dispatchGroup.enter()
-                let storageRef = storage.reference().child("profileImages/\(user.uid).jpg")
-                let metadata = StorageMetadata()
-                metadata.contentType = "image/jpeg"
-                
-                storageRef.putData(profileImageData, metadata: metadata) { metadata, error in
-                    if let error = error {
+                FirebaseHelper.uploadImageToStorage(imageData: profileImageData, imagePath: "profileImages/\(user.uid).jpg") { result in
+                    switch result {
+                    case .success(let urlString):
+                        userProfile.userProfileImage = urlString
+                    case .failure(let error):
                         errorMessage = "Error uploading profile image: \(error.localizedDescription)"
                         showAlert.toggle()
-                    } else {
-                        storageRef.downloadURL { url, error in
-                            if let error = error {
-                                errorMessage = "Error retrieving profile image URL: \(error.localizedDescription)"
-                                showAlert.toggle()
-                            } else if let url = url {
-                                userProfile.userProfileImage = url.absoluteString
-                            }
-                            dispatchGroup.leave()
-                        }
                     }
+                    dispatchGroup.leave()
                 }
             }
-            
+
             dispatchGroup.notify(queue: .main) {
                 updateUserProfile(userRef: userRef)
             }
         }
-    }
-    
-    func loadImageFromURL(urlString: String, completion: @escaping (UIImage?) -> Void) {
-        guard let url = URL(string: urlString) else {
-            completion(nil)
-            return
-        }
-
-        URLSession.shared.dataTask(with: url) { data, _, _ in
-            if let data = data, let image = UIImage(data: data) {
-                DispatchQueue.main.async {
-                    completion(image)
-                }
-            } else {
-                DispatchQueue.main.async {
-                    completion(nil)
-                }
-            }
-        }.resume()
     }
 
     func updateUserProfile(userRef: DocumentReference) {
@@ -136,7 +95,7 @@ struct EditProfileView: View {
                 showAlert.toggle()
             } else {
                 if let credentialURL = userProfile.userCredential {
-                    loadImageFromURL(urlString: credentialURL) { image in
+                    FirebaseHelper.loadImageFromURL(urlString: credentialURL) { (image: UIImage?) in
                         if let image = image {
                             credentialImage = image
                         }
@@ -146,32 +105,42 @@ struct EditProfileView: View {
                 if let profileImageURL = userProfile.userProfileImage {
                     userProfile.profileImageURL = profileImageURL // Set the @Published property
                 }
+                self.presentationMode.wrappedValue.dismiss()
             }
         }
     }
 
-
     var body: some View {
-        NavigationStack {
+        NavigationView {
             Form {
                 Section {
                     HStack {
                         Spacer()
                         Button(action: { showImagePicker.toggle() }) {
-                            if let userPhoto = userPhoto {
-                                Image(uiImage: userPhoto)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 150, height: 150)
-                                    .clipShape(Circle())
-                            } else {
-                                Image(systemName: "person.crop.circle.fill.badge.plus")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 150, height: 150)
-                                    .foregroundColor(.gray)
+                            ZStack {
+                                if let userPhoto = userPhoto {
+                                    Image(uiImage: userPhoto)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 150, height: 150)
+                                        .clipShape(Circle())
+                                } else if !isLoadingImage {
+                                    Image(systemName: "person.crop.circle.fill.badge.plus")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 150, height: 150)
+                                        .foregroundColor(.gray)
+                                }
+                                
+                                if isLoadingImage {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+                                        .scaleEffect(1.0)
+                                        .frame(width: 150, height: 150)
+                                }
                             }
                         }
+
                         .sheet(isPresented: $showImagePicker) {
                             ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
                         }
@@ -179,8 +148,9 @@ struct EditProfileView: View {
                         Spacer()
                     }
                 }
-                    Section(header: Text("Profile")) {
-                        TextField("Name", text: $userProfile.userName)
+
+                Section(header: Text("Profile")) {
+                    TextField("Name", text: $userProfile.userName)
                         .onChange(of: userProfile.userName) { newValue in
                             userProfile.userName = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
@@ -189,8 +159,8 @@ struct EditProfileView: View {
                                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                             }
                         )
-                        
-                        TextEditor(text: $userProfile.userBio)
+
+                    TextEditor(text: $userProfile.userBio)
                         .frame(height: 100)
                         .onChange(of: userProfile.userBio) { newValue in
                             if newValue.count > 160 {
@@ -217,26 +187,28 @@ struct EditProfileView: View {
                                 }
                             }
                         )
-                        
+
                     TextField("Location", text: $userProfile.userLocation)
-                    .gesture(
-                        DragGesture().onChanged { _ in
-                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        .gesture(
+                            DragGesture().onChanged { _ in
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
+                        )
+                        .onChange(of: userProfile.userLocation) { newValue in
+                            userProfile.userLocation = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
-                    )
-                    .onChange(of: userProfile.userLocation) { newValue in
-                        userProfile.userLocation = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                    }
+
                     TextField("Website", text: $userProfile.userWebsite)
-                    .autocapitalization(.none)
-                    .gesture(
-                        DragGesture().onChanged { _ in
-                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        .autocapitalization(.none)
+                        .gesture(
+                            DragGesture().onChanged { _ in
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
+                        )
+                        .onChange(of: userProfile.userWebsite) { newValue in
+                            userProfile.userWebsite = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
-                    )
-                    .onChange(of: userProfile.userWebsite) { newValue in
-                        userProfile.userWebsite = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                    }
+
                     Button(action: {
                         showDatePicker.toggle()
                     }) {
@@ -258,7 +230,6 @@ struct EditProfileView: View {
                             }
                         }
                     }
-                    
                     .onAppear {
                         // Check if the user's birthday has been set.
                         isBirthdaySet = !Calendar.current.isDateInToday(userProfile.userBirthday)
@@ -288,31 +259,31 @@ struct EditProfileView: View {
                         }
                         .padding()
                     }
-                    
                 }
-                
+
                 Section(header: Text("Contact")) {
                     TextField("Email", text: $userProfile.userEmail)
-                    .autocapitalization(.none)
-                    .gesture(
-                        DragGesture().onChanged { _ in
-                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        .autocapitalization(.none)
+                        .gesture(
+                            DragGesture().onChanged { _ in
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
+                        )
+                        .onChange(of: userProfile.userEmail) { newValue in
+                            userProfile.userEmail = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
-                    )
-                    .onChange(of: userProfile.userEmail) { newValue in
-                        userProfile.userEmail = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                    }
+
                     TextField("Phone", text: $userProfile.userPhoneNumber)
-                    .gesture(
-                        DragGesture().onChanged { _ in
-                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        .gesture(
+                            DragGesture().onChanged { _ in
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
+                        )
+                        .onChange(of: userProfile.userPhoneNumber) { newValue in
+                            userProfile.userPhoneNumber = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
-                    )
-                    .onChange(of: userProfile.userPhoneNumber) { newValue in
-                        userProfile.userPhoneNumber = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                    }
                 }
-                
+
                 Section(header: Text("Verification")) {
                     Button(action: { showCredentialImagePicker = true }) {
                         if let credentialImage = credentialImage {
@@ -339,7 +310,7 @@ struct EditProfileView: View {
                     .sheet(isPresented: $showCredentialImagePicker) {
                         ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
                     }
-                    
+
                     if userProfile.userVerification != "" {
                         Text("Status: \(userProfile.userVerification)")
                             .font(.callout)
@@ -352,39 +323,30 @@ struct EditProfileView: View {
                 }
             }
             .navigationBarTitle("Edit Profile", displayMode: .inline)
-            .navigationBarItems(
-                leading:
-                    Button("Cancel") {
-                        presentationMode.wrappedValue.dismiss()
-                    },
-                trailing:
-                    Button("Save") {
-                        if let profileImageURL = userProfile.userProfileImage {
-                            userProfile.profileImageURL = profileImageURL
-                        }
-                        
-                        presentationMode.wrappedValue.dismiss()
-                        saveProfile()
-                        if let userPhoto = userPhoto, let onUpdate = onProfilePhotoUpdated {
-                            onUpdate(userPhoto)
-                        }
+            .navigationBarItems(leading: Button("Cancel") {
+                presentationMode.wrappedValue.dismiss()
+            }, trailing: Button("Save") {
+                saveProfile()
+                presentationMode.wrappedValue.dismiss()
+            })
+        }
+        .onAppear {
+            isLoadingImage = true
+            if let profileImageURL = userProfile.userProfileImage {
+                FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { image in
+                    if let image = image {
+                        userPhoto = image
                     }
-            )
-            .alert(isPresented: $showAlert) {
-                Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
+                    isLoadingImage = false
+                }
+            } else {
+                isLoadingImage = false
             }
-            
-            .onAppear {
 
-
-                loadImageFromURL(urlString: userProfile.userCredential ?? "") { image in
+            if let credentialImageURL = userProfile.userCredential {
+                FirebaseHelper.loadImageFromURL(urlString: credentialImageURL) { (image: UIImage?) in
                     if let image = image {
                         credentialImage = image
-                    }
-                    loadImageFromURL(urlString: userProfile.userProfileImage ?? "") { image in
-                        if let image = image {
-                            userPhoto = image
-                        }
                     }
                 }
             }
@@ -396,7 +358,7 @@ struct ImagePicker: UIViewControllerRepresentable {
     @Binding var selectedImage: UIImage?
     @Binding var imageData: Data?
     @Environment(\.presentationMode) private var presentationMode
-
+    
     func makeCoordinator() -> Coordinator {
         Coordinator(self, imageData: $imageData)
     }
@@ -404,11 +366,22 @@ struct ImagePicker: UIViewControllerRepresentable {
     func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.delegate = context.coordinator
+
+        // Check and request photo library permission
+        if PHPhotoLibrary.authorizationStatus() == .notDetermined {
+            PHPhotoLibrary.requestAuthorization { status in
+                if status == .authorized {
+                    picker.sourceType = .photoLibrary
+                }
+            }
+        } else if PHPhotoLibrary.authorizationStatus() == .authorized {
+            picker.sourceType = .photoLibrary
+        }
+
         return picker
     }
 
     func updateUIViewController(_ uiViewController: UIImagePickerController, context: UIViewControllerRepresentableContext<ImagePicker>) {
-
     }
 
     class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {

@@ -35,7 +35,7 @@ class AuthStateDelegate: ObservableObject {
         }
     }
     
-    deinit {
+    func removeAuthStateListener() {
         if let handle = authStateListenerHandle {
             Auth.auth().removeStateDidChangeListener(handle)
         }
@@ -148,8 +148,8 @@ struct LoginPage: View {
                                     let name = (appleIDCredential.fullName?.givenName ?? "") + " " + (appleIDCredential.fullName?.familyName ?? "")
                                     let email = appleIDCredential.email ?? ""
                                     let location = ""
-                                    let userName = name
-                                    let userEmail = email
+                                    let userName = ""
+                                    let userEmail = ""
                                     let userLocation = ""
                                     let userPhoneNumber = ""
                                     let userBio = ""
