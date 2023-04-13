@@ -124,3 +124,51 @@ struct FirebaseHelper {
         }
     }
 }
+
+func checkIfUserExists(uid: String, completion: @escaping (Bool) -> Void) {
+    let db = Firestore.firestore()
+    let docRef = db.collection("users").document(uid)
+    docRef.getDocument { (document, error) in
+        if let error = error {
+            print("Error checking user existence: \(error)")
+            completion(false)
+            return
+        }
+        
+        if let document = document, document.exists {
+            completion(true)
+        } else {
+            completion(false)
+        }
+    }
+}
+
+func createUserDocument(uid: String, name: String, email: String, location: String, userName: String, userEmail: String, userLocation: String, userPhoneNumber: String, userBio: String, userVerification: String, userCredential: String, userProfileImage: String, userBirthday: Date, userWebsite: String, userJoined: Date) {
+    if let user = Auth.auth().currentUser {
+        let db = Firestore.firestore()
+        let userDocRef = db.collection("users").document(user.uid)
+        // Create or update the user document with the new fields
+        userDocRef.setData([
+            "name": name,
+            "email": email,
+            "location": location,
+            "userName": userName,
+            "userEmail": userEmail,
+            "userLocation": userLocation,
+            "userPhoneNumber": userPhoneNumber,
+            "userBio": userBio,
+            "userVerification": userVerification,
+            "userCredential": userCredential,
+            "userProfileImage": userProfileImage,
+            "userBirthday": userBirthday,
+            "userWebsite": userWebsite,
+            "userJoined": userJoined
+        ]) { error in
+            if let error = error {
+                print("Error creating or updating user document: \(error)")
+            } else {
+                print("User document successfully created or updated!")
+            }
+        }
+    }
+}

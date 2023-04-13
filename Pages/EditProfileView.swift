@@ -28,6 +28,11 @@ struct EditProfileView: View {
     var onProfilePhotoUpdated: ((UIImage) -> Void)?
     @State private var isLoadingUserPhoto: Bool = false
     @State private var isLoadingCredentialImage: Bool = false
+    
+    @State private var userName: String = ""
+    @State private var userBio: String = ""
+    @State private var userLocation: String = ""
+    @State private var userWebsite: String = ""
 
     func saveProfile() {
         if let user = Auth.auth().currentUser {
@@ -134,7 +139,7 @@ struct EditProfileView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section {
                     HStack {
@@ -152,7 +157,7 @@ struct EditProfileView: View {
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: 150, height: 150)
-                                        .foregroundColor(.gray)
+                                        .foregroundColor(.accentColor)
                                 }
                                 
                                 if isLoadingUserPhoto {
@@ -172,29 +177,19 @@ struct EditProfileView: View {
                 }
                 
                 Section(header: Text("Profile")) {
-                    TextField("Name", text: $userProfile.userName)
+                    TextField("Name", text: $userName)
                         .onChange(of: userProfile.userName) { newValue in
                             userProfile.userName = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
-                        .gesture(
-                            DragGesture().onChanged { _ in
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            }
-                        )
-                    
-                    TextEditor(text: $userProfile.userBio)
+
+                    TextEditor(text: $userBio)
                         .frame(height: 100)
                         .onChange(of: userProfile.userBio) { newValue in
                             if newValue.count > 160 {
                                 userProfile.userBio = String(newValue.prefix(160))
                             }
                         }
-                        .gesture(
-                            DragGesture()
-                                .onChanged { _ in
-                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                }
-                        )
+
                         .onChange(of: userProfile.userBio) { newValue in
                             userProfile.userBio = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
@@ -210,23 +205,13 @@ struct EditProfileView: View {
                             }
                         )
                     
-                    TextField("Location", text: $userProfile.userLocation)
-                        .gesture(
-                            DragGesture().onChanged { _ in
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            }
-                        )
+                    TextField("Location", text: $userLocation)
                         .onChange(of: userProfile.userLocation) { newValue in
                             userProfile.userLocation = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
                     
-                    TextField("Website", text: $userProfile.userWebsite)
+                    TextField("Website", text: $userWebsite)
                         .autocapitalization(.none)
-                        .gesture(
-                            DragGesture().onChanged { _ in
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            }
-                        )
                         .onChange(of: userProfile.userWebsite) { newValue in
                             userProfile.userWebsite = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
@@ -236,16 +221,11 @@ struct EditProfileView: View {
                     }) {
                         HStack {
                             Text("Birthday")
-                                .foregroundColor(Color(.label))
-                                .gesture(
-                                    DragGesture().onChanged { _ in
-                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                    }
-                                )
+                                .foregroundColor(Color(.gray))
                             Spacer()
                             if isBirthdaySet {
                                 Text("\(userProfile.userBirthday, formatter: FirebaseHelper().dateFormatter)")
-                                    .foregroundColor(.gray) // Date text should be gray if birthday is set
+                                    .foregroundColor(Color(.placeholderText)) // Date text should be gray if birthday is set
                             } else {
                                 Text("Set Date")
                                     .foregroundColor(.blue) // "Set Date" text should be blue if birthday is not set
@@ -326,16 +306,27 @@ struct EditProfileView: View {
                     }
                 }
             }
+            
+            .scrollDismissesKeyboard(.immediately)
+
             .navigationBarTitle("Edit Profile", displayMode: .inline)
             .navigationBarItems(leading: Button("Cancel") {
                 presentationMode.wrappedValue.dismiss()
             }, trailing: Button("Save") {
+                userProfile.userName = userName
+                userProfile.userBio = userBio
+                userProfile.userLocation = userLocation
+                userProfile.userWebsite = userWebsite
                 saveProfile()
                 presentationMode.wrappedValue.dismiss()
             })
         }
         .onAppear {
             loadImages()
+            userName = userProfile.userName
+            userBio = userProfile.userBio
+            userLocation = userProfile.userLocation
+            userWebsite = userProfile.userWebsite
         }
     }
 }
