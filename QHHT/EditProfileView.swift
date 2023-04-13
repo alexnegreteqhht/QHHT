@@ -12,12 +12,6 @@ struct EditProfileView_Previews: PreviewProvider {
     }
 }
 
-let dateFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "MMM d, yyyy"
-    return formatter
-}()
-
 struct EditProfileView: View {
     @ObservedObject var userProfile: UserProfile
     @Environment(\.presentationMode) private var presentationMode
@@ -39,7 +33,7 @@ struct EditProfileView: View {
         if let user = Auth.auth().currentUser {
             let userRef = Firestore.firestore().collection("users").document(user.uid)
             let dispatchGroup = DispatchGroup()
-
+            
             if let credentialImageData = credentialImageData {
                 dispatchGroup.enter()
                 FirebaseHelper.uploadImageToStorage(imageData: credentialImageData, imagePath: "credentialImages/\(user.uid).jpg") { result in
@@ -53,7 +47,7 @@ struct EditProfileView: View {
                     dispatchGroup.leave()
                 }
             }
-
+            
             if let profileImageData = userPhotoData {
                 dispatchGroup.enter()
                 FirebaseHelper.uploadImageToStorage(imageData: profileImageData, imagePath: "profileImages/\(user.uid).jpg") { result in
@@ -67,13 +61,13 @@ struct EditProfileView: View {
                     dispatchGroup.leave()
                 }
             }
-
+            
             dispatchGroup.notify(queue: .main) {
                 updateUserProfile(userRef: userRef)
             }
         }
     }
-
+    
     func updateUserProfile(userRef: DocumentReference) {
         userRef.updateData([
             "name": userProfile.name,
@@ -88,8 +82,8 @@ struct EditProfileView: View {
             "userCredential": userProfile.userCredential ?? "",
             "userProfileImage": userProfile.userProfileImage ?? "",
             "userWebsite": userProfile.userWebsite,
-            "userBirthday": dateFormatter.string(from: userProfile.userBirthday),
-            "userJoined": dateFormatter.string(from: userProfile.userJoined)
+            "userBirthday": FirebaseHelper().dateFormatter.string(from: userProfile.userBirthday),
+            "userJoined": FirebaseHelper().dateFormatter.string(from: userProfile.userJoined)
         ]) { error in
             if let error = error {
                 errorMessage = "Error updating profile: \(error.localizedDescription)"
@@ -102,7 +96,7 @@ struct EditProfileView: View {
                         }
                     }
                 }
-
+                
                 if let profileImageURL = userProfile.userProfileImage {
                     userProfile.profileImageURL = profileImageURL // Set the @Published property
                 }
@@ -110,7 +104,35 @@ struct EditProfileView: View {
             }
         }
     }
+    
+    // Function to load user and credential images
+    func loadImages() {
+        isLoadingUserPhoto = true
+        isLoadingCredentialImage = true
 
+        if let profileImageURL = userProfile.userProfileImage {
+            FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { image in
+                if let image = image {
+                    userPhoto = image
+                }
+                isLoadingUserPhoto = false
+            }
+        } else {
+            isLoadingUserPhoto = false
+        }
+        
+        if let credentialImageURL = userProfile.userCredential {
+            FirebaseHelper.loadImageFromURL(urlString: credentialImageURL) { image in
+                if let image = image {
+                    credentialImage = image
+                }
+                isLoadingCredentialImage = false
+            }
+        } else {
+            isLoadingCredentialImage = false
+        }
+    }
+    
     var body: some View {
         NavigationView {
             Form {
@@ -141,15 +163,14 @@ struct EditProfileView: View {
                                 }
                             }
                         }
-
                         .sheet(isPresented: $showImagePicker) {
                             ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
                         }
-
+                        
                         Spacer()
                     }
                 }
-
+                
                 Section(header: Text("Profile")) {
                     TextField("Name", text: $userProfile.userName)
                         .onChange(of: userProfile.userName) { newValue in
@@ -160,7 +181,7 @@ struct EditProfileView: View {
                                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                             }
                         )
-
+                    
                     TextEditor(text: $userProfile.userBio)
                         .frame(height: 100)
                         .onChange(of: userProfile.userBio) { newValue in
@@ -188,7 +209,7 @@ struct EditProfileView: View {
                                 }
                             }
                         )
-
+                    
                     TextField("Location", text: $userProfile.userLocation)
                         .gesture(
                             DragGesture().onChanged { _ in
@@ -198,7 +219,7 @@ struct EditProfileView: View {
                         .onChange(of: userProfile.userLocation) { newValue in
                             userProfile.userLocation = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
-
+                    
                     TextField("Website", text: $userProfile.userWebsite)
                         .autocapitalization(.none)
                         .gesture(
@@ -209,7 +230,7 @@ struct EditProfileView: View {
                         .onChange(of: userProfile.userWebsite) { newValue in
                             userProfile.userWebsite = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
-
+                    
                     Button(action: {
                         showDatePicker.toggle()
                     }) {
@@ -223,7 +244,7 @@ struct EditProfileView: View {
                                 )
                             Spacer()
                             if isBirthdaySet {
-                                Text("\(userProfile.userBirthday, formatter: dateFormatter)")
+                                Text("\(userProfile.userBirthday, formatter: FirebaseHelper().dateFormatter)")
                                     .foregroundColor(.gray) // Date text should be gray if birthday is set
                             } else {
                                 Text("Set Date")
@@ -261,7 +282,7 @@ struct EditProfileView: View {
                         .padding()
                     }
                 }
-
+                
                 Section(header: Text("Verification")) {
                     Button(action: { showCredentialImagePicker.toggle() }) {
                         ZStack {
@@ -289,11 +310,11 @@ struct EditProfileView: View {
                     }
                     Text("Upload Credential Image")
                         .foregroundColor(.blue)
-
-                    .sheet(isPresented: $showCredentialImagePicker) {
-                        ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
-                    }
-
+                    
+                        .sheet(isPresented: $showCredentialImagePicker) {
+                            ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
+                        }
+                    
                     if userProfile.userVerification != "" {
                         Text("Status: \(userProfile.userVerification)")
                             .font(.callout)
@@ -314,88 +335,7 @@ struct EditProfileView: View {
             })
         }
         .onAppear {
-            isLoadingUserPhoto = true
-            if let profileImageURL = userProfile.userProfileImage {
-                FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { image in
-                    if let image = image {
-                        userPhoto = image
-                    }
-                    isLoadingUserPhoto = false
-                }
-            } else {
-                isLoadingUserPhoto = false
-            }
-            
-            isLoadingCredentialImage = true
-            if let credentialImageURL = userProfile.userCredential {
-                FirebaseHelper.loadImageFromURL(urlString: credentialImageURL) { image in
-                    if let image = image {
-                        credentialImage = image
-                    }
-                    isLoadingCredentialImage = false
-                }
-            } else {
-                isLoadingCredentialImage = false
-            }
-
-            if let credentialImageURL = userProfile.userCredential {
-                FirebaseHelper.loadImageFromURL(urlString: credentialImageURL) { (image: UIImage?) in
-                    if let image = image {
-                        credentialImage = image
-                    }
-                }
-            }
-        }
-    }
-}
-
-struct ImagePicker: UIViewControllerRepresentable {
-    @Binding var selectedImage: UIImage?
-    @Binding var imageData: Data?
-    @Environment(\.presentationMode) private var presentationMode
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self, imageData: $imageData)
-    }
-
-    func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.delegate = context.coordinator
-
-        // Check and request photo library permission
-        if PHPhotoLibrary.authorizationStatus() == .notDetermined {
-            PHPhotoLibrary.requestAuthorization { status in
-                if status == .authorized {
-                    picker.sourceType = .photoLibrary
-                }
-            }
-        } else if PHPhotoLibrary.authorizationStatus() == .authorized {
-            picker.sourceType = .photoLibrary
-        }
-
-        return picker
-    }
-
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: UIViewControllerRepresentableContext<ImagePicker>) {
-    }
-
-    class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-        let parent: ImagePicker
-        @Binding var imageData: Data?
-
-        init(_ parent: ImagePicker, imageData: Binding<Data?>) {
-            self.parent = parent
-            _imageData = imageData
-        }
-
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let uiImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-                parent.selectedImage = uiImage
-                if let data = uiImage.jpegData(compressionQuality: 1.0) {
-                    imageData = data
-                }
-            }
-            parent.presentationMode.wrappedValue.dismiss()
+            loadImages()
         }
     }
 }
