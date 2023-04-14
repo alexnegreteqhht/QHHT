@@ -25,13 +25,14 @@ struct EditProfileView: View {
     @State private var showCredentialImagePicker = false
     @State private var showDatePicker = false
     @State private var isBirthdaySet = false
-    var onProfilePhotoUpdated: ((UIImage) -> Void)?
     @State private var isLoadingUserPhoto: Bool = false
     @State private var isLoadingCredentialImage: Bool = false
     @State private var userName: String = ""
     @State private var userBio: String = ""
     @State private var userLocation: String = ""
     @State private var userWebsite: String = ""
+    var onProfilePhotoUpdated: ((UIImage) -> Void)?
+    var onProfileUpdated: (() -> Void)?
 
     func saveProfile() {
         if let user = Auth.auth().currentUser {
@@ -105,6 +106,7 @@ struct EditProfileView: View {
                     userProfile.profileImageURL = profileImageURL // Set the @Published property
                 }
                 self.presentationMode.wrappedValue.dismiss()
+                onProfileUpdated?() // Call the closure here
             }
         }
     }
@@ -141,15 +143,24 @@ struct EditProfileView: View {
         NavigationStack {
             Form {
                 Section {
-                        VStack {
-                            if let userPhoto = userPhoto {
+                        if let userPhoto = userPhoto {
+                            Button(action: {
+                                showImagePicker.toggle()
+                            }) {
                                 Image(uiImage: userPhoto)
                                     .resizable()
                                     .scaledToFill()
                                     .frame(width: 150, height: 150)
                                     .clipShape(Circle())
                                     .frame(maxWidth: .infinity, alignment: .center)
-                            } else if !isLoadingUserPhoto {
+                                    .sheet(isPresented: $showImagePicker) {
+                                        ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
+                                    }
+                            }
+                        } else if !isLoadingUserPhoto {
+                            Button(action: {
+                                showImagePicker.toggle()
+                            }) {
                                 Image(systemName: "person.crop.circle.fill.badge.plus")
                                     .resizable()
                                     .scaledToFit()
@@ -160,15 +171,6 @@ struct EditProfileView: View {
                                         ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
                                     }
                             }
-                            
-                            if isLoadingUserPhoto {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .gray))
-                                    .scaleEffect(1.0)
-                                    .frame(width: 150, height: 150)
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                            }
-
                         }
                     Button(action: {
                         showImagePicker.toggle()
@@ -289,7 +291,6 @@ struct EditProfileView: View {
                                     .progressViewStyle(CircularProgressViewStyle(tint: .gray))
                                     .scaleEffect(1.0)
                                     .frame(width: 150, height: 150)
-                                    .frame(maxWidth: .infinity, alignment: .center)
                             }
                     }
                     Button(action: {
