@@ -17,3 +17,7 @@ class UserProfile: ObservableObject {
     @Published var userJoined: Date = Date()
     @Published var profileImageURL: String? = nil
 }
+
+class UserProfileData: ObservableObject {
+    @Published var userProfile: UserProfile?
+}

@@ -11,50 +11,53 @@ struct ProfileView_Previews: PreviewProvider {
 }
 
 struct ProfileView: View {
-    @State private var userProfile = UserProfile()
+    @EnvironmentObject var userProfileData: UserProfileData
     @State private var tempProfileImage: UIImage? = nil
     @State private var hasProfileImageLoaded = false
     @State private var showEditProfile = false
     @State private var showSettings = false
-    @State private var isContentLoaded = false
-    @State var userPhoto: UIImage? = nil
     
     var body: some View {
         NavigationStack {
             GeometryReader { geometry in
                 ScrollView {
-                    ProfileImage(tempProfileImage: $tempProfileImage, userProfile: userProfile, hasProfileImageLoaded: $hasProfileImageLoaded, showEditProfile: $showEditProfile)
-                    Text(userProfile.userName)
-                        .font(.title)
-                        .fontWeight(.bold)
-                    Text(userProfile.userBio)
-                        .font(.callout)
-                        .foregroundColor(.primary)
-                    EditProfileButton(showEditProfile: $showEditProfile, userProfile: userProfile, tempProfileImage: $tempProfileImage, onProfileUpdated: {
-                        FirebaseHelper.shared.fetchUserData { fetchedUserProfile in
-                            self.userProfile = fetchedUserProfile
-                            FirebaseHelper.shared.loadImage(urlString: userProfile.userProfileImage) { uiImage in
-                                tempProfileImage = uiImage
-                            }
+                    VStack(alignment: .center, spacing: 16) {
+                        
+                        if let userProfile = userProfileData.userProfile {
+                            ProfileImage(tempProfileImage: $tempProfileImage, userProfile: userProfile, hasProfileImageLoaded: $hasProfileImageLoaded, showEditProfile: $showEditProfile)
+                            
+                            Text(userProfile.userName)
+                                .font(.title)
+                                .fontWeight(.bold)
+                            
+                            Text(userProfile.userBio)
+                                .font(.callout)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                            
+                            EditProfileButton(showEditProfile: $showEditProfile, userProfile: userProfile, tempProfileImage: $tempProfileImage, onProfileUpdated: {
+                                FirebaseHelper.shared.fetchUserData { fetchedUserProfile in
+                                    userProfileData.userProfile = fetchedUserProfile
+                                    FirebaseHelper.shared.loadImage(urlString: userProfile.userProfileImage) { uiImage in
+                                        tempProfileImage = uiImage
+                                    }
+                                }
+                            })
+                            
+                            SettingsButton(showSettings: $showSettings, userProfile: userProfile)
                         }
-                    })
-                    SettingsButton(showSettings: $showSettings, userProfile: userProfile)
-                        .padding(.top, 8)
+                    }
+                    .padding(.top, 50)
+                    .padding(.horizontal, geometry.size.width * 0.05)
+                    .navigationBarTitle("Profile", displayMode: .large)
                 }
-                
-                .padding(.top, 50)
-                .padding(.horizontal, geometry.size.width * 0.05)
-                .navigationBarTitle("Profile", displayMode: .large)
             }
-        }
-        .onAppear {
-            FirebaseHelper.shared.fetchUserData { fetchedUserProfile in
-                self.userProfile = fetchedUserProfile
-                isContentLoaded = true
-                
-                FirebaseHelper.shared.loadImage(urlString: userProfile.userProfileImage) { uiImage in
-                    tempProfileImage = uiImage
-                    hasProfileImageLoaded = true
+            .onAppear {
+                if let userProfile = userProfileData.userProfile {
+                    FirebaseHelper.shared.loadImage(urlString: userProfile.userProfileImage) { uiImage in
+                        tempProfileImage = uiImage
+                    }
                 }
             }
         }
@@ -80,15 +83,16 @@ struct ProfileImage: View {
                     AsyncImage(url: url) { image in
                         image.resizable()
                     } placeholder: {
-                        if hasProfileImageLoaded {
-                            ProgressView()
-                        }
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .gray))
                     }
                     .scaledToFill()
                     .frame(width: 150, height: 150)
                     .clipShape(Circle())
-                    .task {
-                        hasProfileImageLoaded = true
+                    .onAppear {
+                        FirebaseHelper.shared.loadImage(urlString: userProfile.userProfileImage) { uiImage in
+                            tempProfileImage = uiImage
+                        }
                     }
                 } else {
                     Button(action: {

@@ -3,20 +3,12 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var authStateDelegate: AuthStateDelegate
-       
-    // Define the appData @StateObject
+    @StateObject private var userProfileData = UserProfileData()
     @StateObject var appData = AppData()
-       
-    // Define the selectedTab @State
     @State private var selectedTab = 0
        
-    // Define the ContentView body
     var body: some View {
-           
-        // Define the TabView
         TabView(selection: $selectedTab) {
-               
-            // Display the DirectoryView as the first tab
             DirectoryView()
                 .navigationBarTitle("Directory", displayMode: .automatic)
                 .tabItem {
@@ -26,7 +18,6 @@ struct ContentView: View {
                 .tag(0)
                 .environmentObject(appData)
                
-            // Display the ForumView as the second tab
             ForumView()
                 .navigationBarTitle("Forum", displayMode: .automatic)
                 .tabItem {
@@ -36,7 +27,6 @@ struct ContentView: View {
                 .tag(1)
                 .environmentObject(appData)
                
-            // Display the ProfileView as the third tab
             ProfileView()
                 .navigationBarTitle("Me", displayMode: .automatic)
                 .tabItem {
@@ -46,6 +36,11 @@ struct ContentView: View {
                 .tag(2)
                 .environmentObject(appData)
         }
-        .environmentObject(appData)
+        .onAppear {
+            FirebaseHelper.shared.fetchUserData { fetchedUserProfile in
+                userProfileData.userProfile = fetchedUserProfile
+            }
+        }
+        .environmentObject(userProfileData)
     }
 }

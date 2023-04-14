@@ -31,10 +31,12 @@ struct EditProfileView: View {
     @State private var userBio: String = ""
     @State private var userLocation: String = ""
     @State private var userWebsite: String = ""
+    @State private var isSavingProfile: Bool = false
     var onProfilePhotoUpdated: ((UIImage) -> Void)?
     var onProfileUpdated: (() -> Void)?
 
     func saveProfile() {
+        isSavingProfile = true
         if let user = Auth.auth().currentUser {
             let userRef = Firestore.firestore().collection("users").document(user.uid)
             let dispatchGroup = DispatchGroup()
@@ -103,12 +105,17 @@ struct EditProfileView: View {
                 }
                 
                 if let profileImageURL = userProfile.userProfileImage {
-                    userProfile.profileImageURL = profileImageURL // Set the @Published property
+                    userProfile.profileImageURL = profileImageURL
                 }
-                self.presentationMode.wrappedValue.dismiss()
-                onProfileUpdated?() // Call the closure here
+                DispatchQueue.main.async {
+                    onProfileUpdated?() // Call the closure here
+                    self.presentationMode.wrappedValue.dismiss()
+                    isSavingProfile = false
+                }
             }
+            
         }
+        
     }
     
     // Function to load user and credential images
@@ -143,35 +150,42 @@ struct EditProfileView: View {
         NavigationStack {
             Form {
                 Section {
-                        if let userPhoto = userPhoto {
-                            Button(action: {
-                                showImagePicker.toggle()
-                            }) {
-                                Image(uiImage: userPhoto)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 150, height: 150)
-                                    .clipShape(Circle())
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                                    .sheet(isPresented: $showImagePicker) {
-                                        ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
-                                    }
-                            }
-                        } else if !isLoadingUserPhoto {
-                            Button(action: {
-                                showImagePicker.toggle()
-                            }) {
-                                Image(systemName: "person.crop.circle.fill.badge.plus")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 150, height: 150)
-                                    .foregroundColor(.gray)
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                                    .sheet(isPresented: $showImagePicker) {
-                                        ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
-                                    }
-                            }
+                    if let userPhoto = userPhoto {
+                        Button(action: {
+                            showImagePicker.toggle()
+                        }) {
+                            Image(uiImage: userPhoto)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 150, height: 150)
+                                .clipShape(Circle())
+                                .frame(maxWidth: .infinity, alignment: .center)
                         }
+                    } else {
+                        Button(action: {
+                            showImagePicker.toggle()
+                        }) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 75)
+                                    .foregroundColor(.clear)
+                                    .frame(width: 150, height: 150)
+                                
+                                if !isLoadingUserPhoto {
+                                    Image(systemName: "person.crop.circle.fill.badge.plus")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 150, height: 150)
+                                        .foregroundColor(.gray)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                } else {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        }
+                    }
+                    
                     Button(action: {
                         showImagePicker.toggle()
                     }) {
@@ -182,6 +196,9 @@ struct EditProfileView: View {
                             }
                     }
                 }
+                .sheet(isPresented: $showImagePicker) {
+                    ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
+                }
                 
                 Section(header: Text("Profile")) {
                     TextField("Name", text: $userName)
@@ -191,18 +208,17 @@ struct EditProfileView: View {
 
                     TextEditor(text: $userBio)
                         .frame(height: 100)
-                        .onChange(of: userProfile.userBio) { newValue in
+                        .onChange(of: userBio) { newValue in
                             if newValue.count > 160 {
-                                userProfile.userBio = String(newValue.prefix(160))
+                                userBio = String(newValue.prefix(160))
                             }
                         }
-
-                        .onChange(of: userProfile.userBio) { newValue in
-                            userProfile.userBio = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                        .onChange(of: userBio) { newValue in
+                            userBio = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
                         .overlay(
                             Group {
-                                if userProfile.userBio.isEmpty {
+                                if userBio.isEmpty {
                                     Text("Bio")
                                         .foregroundColor(Color(.placeholderText))
                                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -307,18 +323,26 @@ struct EditProfileView: View {
             
             .scrollDismissesKeyboard(.immediately)
             .ignoresSafeArea(.keyboard)
-
-            .navigationBarTitle("Edit Profile", displayMode: .inline)
+            
             .navigationBarItems(leading: Button("Cancel") {
                 presentationMode.wrappedValue.dismiss()
-            }, trailing: Button("Save") {
-                userProfile.userName = userName
-                userProfile.userBio = userBio
-                userProfile.userLocation = userLocation
-                userProfile.userWebsite = userWebsite
-                saveProfile()
-                presentationMode.wrappedValue.dismiss()
-            })
+            }, trailing:
+                Group {
+                    if isSavingProfile {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+                    } else {
+                        Button("Save") {
+                            userProfile.userName = userName
+                            userProfile.userBio = userBio
+                            userProfile.userLocation = userLocation
+                            userProfile.userWebsite = userWebsite
+                            saveProfile()
+                            //                self.presentationMode.wrappedValue.dismiss()
+                        }
+                    }
+                }
+            )
         }
         .onAppear {
             loadImages()
