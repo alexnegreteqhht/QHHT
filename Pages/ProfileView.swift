@@ -89,9 +89,8 @@ struct ProfileImage: View {
                     if hasProfileImageLoaded {
                         ZStack {
                             Circle()
-                                .fill(Color.accentColor)
+                                .fill(Color(.secondarySystemBackground))
                                 .frame(width: 150, height: 150)
-                            
                             ProgressView()
                         }
                     }
@@ -111,9 +110,8 @@ struct ProfileImage: View {
             } else {
                 ZStack {
                     Circle()
-                        .fill(Color.accentColor)
+                        .fill(Color(.secondarySystemBackground))
                         .frame(width: 150, height: 150)
-                    
                     ProgressView()
                 }
             }

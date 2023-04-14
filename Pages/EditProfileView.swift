@@ -28,7 +28,6 @@ struct EditProfileView: View {
     var onProfilePhotoUpdated: ((UIImage) -> Void)?
     @State private var isLoadingUserPhoto: Bool = false
     @State private var isLoadingCredentialImage: Bool = false
-    
     @State private var userName: String = ""
     @State private var userBio: String = ""
     @State private var userLocation: String = ""
@@ -142,37 +141,43 @@ struct EditProfileView: View {
         NavigationStack {
             Form {
                 Section {
-                    HStack {
-                        Spacer()
-                        Button(action: { showImagePicker.toggle() }) {
-                            ZStack {
-                                if let userPhoto = userPhoto {
-                                    Image(uiImage: userPhoto)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 150, height: 150)
-                                        .clipShape(Circle())
-                                } else if !isLoadingUserPhoto {
-                                    Image(systemName: "person.crop.circle.fill.badge.plus")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 150, height: 150)
-                                        .foregroundColor(.accentColor)
-                                }
-                                
-                                if isLoadingUserPhoto {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .gray))
-                                        .scaleEffect(1.0)
-                                        .frame(width: 150, height: 150)
-                                }
+                        VStack {
+                            if let userPhoto = userPhoto {
+                                Image(uiImage: userPhoto)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 150, height: 150)
+                                    .clipShape(Circle())
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                            } else if !isLoadingUserPhoto {
+                                Image(systemName: "person.crop.circle.fill.badge.plus")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 150, height: 150)
+                                    .foregroundColor(.gray)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                    .sheet(isPresented: $showImagePicker) {
+                                        ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
+                                    }
                             }
+                            
+                            if isLoadingUserPhoto {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+                                    .scaleEffect(1.0)
+                                    .frame(width: 150, height: 150)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                            }
+
                         }
-                        .sheet(isPresented: $showImagePicker) {
-                            ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
-                        }
-                        
-                        Spacer()
+                    Button(action: {
+                        showImagePicker.toggle()
+                    }) {
+                        Text("Edit Photo")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .sheet(isPresented: $showImagePicker) {
+                                ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
+                            }
                     }
                 }
                 
@@ -221,23 +226,21 @@ struct EditProfileView: View {
                     }) {
                         HStack {
                             Text("Birthday")
-                                .foregroundColor(Color(.gray))
+                                .foregroundColor(Color.secondary)
                             Spacer()
                             if isBirthdaySet {
                                 Text("\(userProfile.userBirthday, formatter: FirebaseHelper().dateFormatter)")
-                                    .foregroundColor(Color(.placeholderText)) // Date text should be gray if birthday is set
+                                    .foregroundColor(Color(.placeholderText))
                             } else {
                                 Text("Set Date")
-                                    .foregroundColor(.blue) // "Set Date" text should be blue if birthday is not set
+                                    .foregroundColor(.blue)
                             }
                         }
                     }
                     .onAppear {
-                        // Check if the user's birthday has been set.
                         isBirthdaySet = !Calendar.current.isDateInToday(userProfile.userBirthday)
                     }
                     .onChange(of: userProfile.userBirthday) { _ in
-                        // Update isBirthdaySet when the user selects a birthday.
                         isBirthdaySet = !Calendar.current.isDateInToday(userProfile.userBirthday)
                     }
                     .sheet(isPresented: $showDatePicker) {
@@ -263,21 +266,22 @@ struct EditProfileView: View {
                     }
                 }
                 
-                Section(header: Text("Verification")) {
+                Section(header: Text("Verification"), footer: Text("Earn your verified practitioner badge by uploading an image of your certification.")) {
                     Button(action: { showCredentialImagePicker.toggle() }) {
-                        ZStack {
                             if let credentialImage = credentialImage {
                                 Image(uiImage: credentialImage)
                                     .resizable()
                                     .scaledToFill()
                                     .frame(width: 150, height: 150)
                                     .clipped()
+                                    .frame(maxWidth: .infinity, alignment: .center)
                             } else if !isLoadingCredentialImage {
                                 Image(systemName: "doc.badge.plus")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 150, height: 150)
                                     .foregroundColor(.gray)
+                                    .frame(maxWidth: .infinity, alignment: .center)
                             }
                             
                             if isLoadingCredentialImage {
@@ -285,29 +289,23 @@ struct EditProfileView: View {
                                     .progressViewStyle(CircularProgressViewStyle(tint: .gray))
                                     .scaleEffect(1.0)
                                     .frame(width: 150, height: 150)
+                                    .frame(maxWidth: .infinity, alignment: .center)
                             }
-                        }
                     }
-                    Text("Upload Credential Image")
-                        .foregroundColor(.blue)
-                    
-                        .sheet(isPresented: $showCredentialImagePicker) {
-                            ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
-                        }
-                    
-                    if userProfile.userVerification != "" {
-                        Text("Status: \(userProfile.userVerification)")
-                            .font(.callout)
-                            .foregroundColor(.gray)
-                    } else {
-                        Text("Earn your verified practitioner badge by uploading an image of your certification. Image must match the name on your account.")
-                            .font(.callout)
-                            .foregroundColor(.gray)
+                    Button(action: {
+                        showCredentialImagePicker.toggle()
+                    }) {
+                        Text("Upload Credential")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .sheet(isPresented: $showCredentialImagePicker) {
+                                ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
+                            }
                     }
                 }
             }
             
             .scrollDismissesKeyboard(.immediately)
+            .ignoresSafeArea(.keyboard)
 
             .navigationBarTitle("Edit Profile", displayMode: .inline)
             .navigationBarItems(leading: Button("Cancel") {
