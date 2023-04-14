@@ -6,7 +6,7 @@ import Combine
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         ProfileView()
-            .environmentObject(AppData())
+            .environmentObject(UserProfileData.previewData())
     }
 }
 
@@ -14,17 +14,20 @@ struct ProfileView: View {
     @EnvironmentObject var userProfileData: UserProfileData
     @State private var tempProfileImage: UIImage? = nil
     @State private var hasProfileImageLoaded = false
-    @State private var showEditProfile = false
-    @State private var showSettings = false
+    @State private var isEditProfilePresented = false
+    @State private var isSettingsPresented = false
+    
+    private let profileImageSize: CGFloat = 150
     
     var body: some View {
-        NavigationStack {
+        NavigationView {
             GeometryReader { geometry in
                 ScrollView {
                     VStack(alignment: .center, spacing: 16) {
                         
                         if let userProfile = userProfileData.userProfile {
-                            ProfileImage(tempProfileImage: $tempProfileImage, userProfile: userProfile, hasProfileImageLoaded: $hasProfileImageLoaded, showEditProfile: $showEditProfile)
+                            ProfileImage(userProfile: userProfile, tempProfileImage: $tempProfileImage, hasProfileImageLoaded: $hasProfileImageLoaded, isEditProfilePresented: $isEditProfilePresented)
+                                .frame(width: profileImageSize, height: profileImageSize)
                             
                             Text(userProfile.userName)
                                 .font(.title)
@@ -36,16 +39,9 @@ struct ProfileView: View {
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal)
                             
-                            EditProfileButton(showEditProfile: $showEditProfile, userProfile: userProfile, tempProfileImage: $tempProfileImage, onProfileUpdated: {
-                                FirebaseHelper.shared.fetchUserData { fetchedUserProfile in
-                                    userProfileData.userProfile = fetchedUserProfile
-                                    FirebaseHelper.shared.loadImage(urlString: userProfile.userProfileImage) { uiImage in
-                                        tempProfileImage = uiImage
-                                    }
-                                }
-                            })
+                            EditProfileButton(isEditProfilePresented: $isEditProfilePresented, userProfile: userProfile, tempProfileImage: $tempProfileImage, onProfileUpdated: loadProfileImage)
                             
-                            SettingsButton(showSettings: $showSettings, userProfile: userProfile)
+                            SettingsButton(isSettingsPresented: $isSettingsPresented, userProfile: userProfile)
                         }
                     }
                     .padding(.top, 50)
@@ -53,22 +49,25 @@ struct ProfileView: View {
                     .navigationBarTitle("Profile", displayMode: .large)
                 }
             }
-            .onAppear {
-                if let userProfile = userProfileData.userProfile {
-                    FirebaseHelper.shared.loadImage(urlString: userProfile.userProfileImage) { uiImage in
-                        tempProfileImage = uiImage
-                    }
-                }
+            .onAppear(perform: loadProfileImage)
+        }
+    }
+    
+    private func loadProfileImage() {
+        if let userProfile = userProfileData.userProfile {
+            FirebaseHelper.shared.loadImage(urlString: userProfile.userProfileImage) { uiImage in
+                tempProfileImage = uiImage
             }
         }
     }
 }
 
 struct ProfileImage: View {
-    @Binding var tempProfileImage: UIImage?
+    @EnvironmentObject var userProfileData: UserProfileData
     @ObservedObject var userProfile: UserProfile
+    @Binding var tempProfileImage: UIImage?
     @Binding var hasProfileImageLoaded: Bool
-    @Binding var showEditProfile: Bool
+    @Binding var isEditProfilePresented: Bool
     
     var body: some View {
         Group {
@@ -90,13 +89,15 @@ struct ProfileImage: View {
                     .frame(width: 150, height: 150)
                     .clipShape(Circle())
                     .onAppear {
-                        FirebaseHelper.shared.loadImage(urlString: userProfile.userProfileImage) { uiImage in
-                            tempProfileImage = uiImage
+                        if let userProfile = userProfileData.userProfile, let userProfileImage = userProfile.userProfileImage {
+                            FirebaseHelper.shared.loadImage(urlString: userProfileImage) { uiImage in
+                                tempProfileImage = uiImage
+                            }
                         }
                     }
                 } else {
                     Button(action: {
-                        showEditProfile.toggle()
+                        isEditProfilePresented.toggle()
                     }) {
                         Image(systemName: "person.crop.circle.fill.badge.plus")
                             .resizable()
@@ -111,14 +112,14 @@ struct ProfileImage: View {
 }
 
 struct EditProfileButton: View {
-    @Binding var showEditProfile: Bool
+    @Binding var isEditProfilePresented: Bool
     @ObservedObject var userProfile: UserProfile
     @Binding var tempProfileImage: UIImage?
     var onProfileUpdated: (() -> Void)?
     
     var body: some View {
         Button(action: {
-            showEditProfile.toggle()
+            isEditProfilePresented.toggle()
         }) {
             Text("Edit Profile")
                 .frame(minWidth: 0, maxWidth: .infinity)
@@ -128,7 +129,7 @@ struct EditProfileButton: View {
                 .cornerRadius(10)
         }
         .padding(.horizontal, 20)
-        .sheet(isPresented: $showEditProfile) {
+        .sheet(isPresented: $isEditProfilePresented) {
             EditProfileView(userProfile: userProfile, userPhoto: tempProfileImage, onProfilePhotoUpdated: { newImage in
                 tempProfileImage = newImage
             }, onProfileUpdated: onProfileUpdated)
@@ -137,17 +138,17 @@ struct EditProfileButton: View {
 }
 
 struct SettingsButton: View {
-    @Binding var showSettings: Bool
+    @Binding var isSettingsPresented: Bool
     @ObservedObject var userProfile: UserProfile
     
     var body: some View {
         Button(action: {
-            showSettings.toggle()
+            isSettingsPresented.toggle()
         }) {
             Text("Settings")
         }
         .padding(.horizontal, 20)
-        .sheet(isPresented: $showSettings) {
+        .sheet(isPresented: $isSettingsPresented) {
             SettingsView(userProfile: userProfile)
         }
     }

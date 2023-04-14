@@ -901,3 +901,163 @@
 //        }
 //    }
 //}
+
+
+//                Section(header: Text("Profile"), footer: Text("We use your birthday to personalize your experience and offer discounts. Your birth year will not be shown on your profile.")) {
+//                    TextField("Name", text: $userName)
+//                        .onChange(of: userProfile.userName) { newValue in
+//                            userProfile.userName = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+//                        }
+//
+//                    TextEditor(text: $userBio)
+//                        .frame(height: 100)
+//                        .onChange(of: userBio) { newValue in
+//                            if newValue.count > 160 {
+//                                userBio = String(newValue.prefix(160))
+//                            }
+//                        }
+//                        .onChange(of: userBio) { newValue in
+//                            userBio = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+//                        }
+//                        .overlay(
+//                            Group {
+//                                if userBio.isEmpty {
+//                                    Text("Bio")
+//                                        .foregroundColor(Color(.placeholderText))
+//                                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+//                                        .padding(.top, 8)
+//                                        .padding(.leading, 4)
+//                                }
+//                            }
+//                        )
+//
+//                    TextField("Location", text: $userLocation)
+//                        .onChange(of: userProfile.userLocation) { newValue in
+//                            userProfile.userLocation = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+//                        }
+//
+//                    TextField("Website", text: $userWebsite)
+//                        .autocapitalization(.none)
+//                        .onChange(of: userProfile.userWebsite) { newValue in
+//                            userProfile.userWebsite = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+//                        }
+    
+//                    Button(action: {
+//                        showDatePicker.toggle()
+//                    }) {
+//                        HStack {
+//                            Text("Birthday")
+//                                .foregroundColor(Color.secondary)
+//                            Spacer()
+//                            if isBirthdaySet {
+//                                Text("\(userProfile.userBirthday, formatter: FirebaseHelper().dateFormatter)")
+//                                    .foregroundColor(Color(.placeholderText))
+//                            } else {
+//                                Text("Set Date")
+//                                    .foregroundColor(.blue)
+//                            }
+//                        }
+//                    }
+//                    .onAppear {
+//                        isBirthdaySet = !Calendar.current.isDateInToday(userProfile.userBirthday)
+//                    }
+//                    .onChange(of: userProfile.userBirthday) { _ in
+//                        isBirthdaySet = !Calendar.current.isDateInToday(userProfile.userBirthday)
+//                    }
+//                    .sheet(isPresented: $showDatePicker) {
+//                        VStack {
+//                            Text("Select Your Birthday")
+//                                .font(.headline)
+//                            DatePicker("", selection: $userProfile.userBirthday, displayedComponents: .date)
+//                                .datePickerStyle(WheelDatePickerStyle())
+//                                .labelsHidden()
+//                            Button(action: {
+//                                isBirthdaySet = true
+//                                showDatePicker = false
+//                            }) {
+//                                Text("Done")
+//                                    .padding()
+//                                    .background(Color.blue)
+//                                    .foregroundColor(.white)
+//                                    .cornerRadius(10)
+//                            }
+//                            .padding(.top)
+//                        }
+//                        .padding()
+//                    }
+//                }
+
+//                Section(header: Text("Birthday"), footer: Text("We use this to improve your experience and give you discounts from practitioners. Your birth year will not be shown.")) {
+//                    Button(action: {
+//                        showDatePicker.toggle()
+//                    }) {
+//                        if isBirthdaySet {
+//                            Text("\(userProfile.userBirthday, formatter: FirebaseHelper().dateFormatter)")
+//                                .foregroundColor(Color(.placeholderText))
+//                        } else {
+//                            Text("Add Birthday")
+//                        }
+//                    }
+//
+//                    .onChange(of: userProfile.userBirthday) { _ in
+//                        isBirthdaySet = !Calendar.current.isDateInToday(userProfile.userBirthday)
+//                    }
+//                    .sheet(isPresented: $showDatePicker) {
+//                        VStack {
+//                            Text("Select Your Birthday")
+//                                .font(.headline)
+//                            DatePicker("", selection: $userProfile.userBirthday, displayedComponents: .date)
+//                                .datePickerStyle(WheelDatePickerStyle())
+//                                .labelsHidden()
+//                            Button(action: {
+//                                isBirthdaySet = true
+//                                showDatePicker = false
+//                            }) {
+//                                Text("Done")
+//                                    .padding()
+//                                    .background(Color.blue)
+//                                    .foregroundColor(.white)
+//                                    .cornerRadius(10)
+//                            }
+//                            .padding(.top)
+//                        }
+//                        .padding()
+//                    }
+//                }
+//
+//                Section(header: Text("Verification"), footer: Text("We ensure all practitioners on our platform are verified. Become a verified practitioner by uploading an image of your certification.")) {
+//                    Button(action: { showCredentialImagePicker.toggle() }) {
+//                            if let credentialImage = credentialImage {
+//                                Image(uiImage: credentialImage)
+//                                    .resizable()
+//                                    .scaledToFill()
+//                                    .frame(width: 150, height: 150)
+//                                    .clipped()
+//                                    .frame(maxWidth: .infinity, alignment: .center)
+//                            } else if !isLoadingCredentialImage {
+//                                Image(systemName: "doc.badge.plus")
+//                                    .resizable()
+//                                    .scaledToFit()
+//                                    .frame(width: 150, height: 150)
+//                                    .foregroundColor(.gray)
+//                                    .frame(maxWidth: .infinity, alignment: .center)
+//                            }
+//
+//                            if isLoadingCredentialImage {
+//                                ProgressView()
+//                                    .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+//                                    .scaleEffect(1.0)
+//                                    .frame(width: 150, height: 150)
+//                            }
+//                    }
+//                    Button(action: {
+//                        showCredentialImagePicker.toggle()
+//                    }) {
+//                        Text("Upload Credential")
+//                            .frame(maxWidth: .infinity, alignment: .center)
+//                            .sheet(isPresented: $showCredentialImagePicker) {
+//                                ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
+//                            }
+//                    }
+//                }
+//            }

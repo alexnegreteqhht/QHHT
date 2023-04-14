@@ -68,7 +68,7 @@ struct FirebaseHelper {
             let docRef = db.collection("users").document(user.uid)
 
             docRef.getDocument { (document, error) in
-                let userProfile = UserProfile()
+                let userProfile = UserProfile(id: "", userName: "", userBio: "", userProfileImage: "")
                 if let document = document, document.exists {
                     userProfile.objectWillChange.send()
                     

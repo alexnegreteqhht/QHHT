@@ -1,6 +1,6 @@
 import Foundation
 
-class UserProfile: ObservableObject {
+class UserProfile: ObservableObject, Identifiable {
     @Published var name: String = ""
     @Published var email: String = ""
     @Published var location: String = ""
@@ -16,8 +16,20 @@ class UserProfile: ObservableObject {
     @Published var userBirthday: Date = Date()
     @Published var userJoined: Date = Date()
     @Published var profileImageURL: String? = nil
+    
+    init(id: String, userName: String, userBio: String, userProfileImage: String?) {
+        self.userName = userName
+        self.userBio = userBio
+        self.userProfileImage = userProfileImage
+    }
 }
 
 class UserProfileData: ObservableObject {
     @Published var userProfile: UserProfile?
+    
+    static func previewData() -> UserProfileData {
+        let userProfileData = UserProfileData()
+        userProfileData.userProfile = UserProfile(id: "123", userName: "John Doe", userBio: "SwiftUI enthusiast", userProfileImage: nil)
+        return userProfileData
+    }
 }

@@ -7,8 +7,7 @@ import FirebaseFirestore
 
 struct EditProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        EditProfileView(userProfile: UserProfile())
-        .environmentObject(AppData())
+        EditProfileView(userProfile: UserProfile(id: "", userName: "", userBio: "", userProfileImage: ""))
     }
 }
 
@@ -23,10 +22,10 @@ struct EditProfileView: View {
     @State private var credentialImage: UIImage?
     @State private var credentialImageData: Data?
     @State private var showCredentialImagePicker = false
+    @State private var isLoadingCredentialImage: Bool = false
     @State private var showDatePicker = false
     @State private var isBirthdaySet = false
     @State private var isLoadingUserPhoto: Bool = false
-    @State private var isLoadingCredentialImage: Bool = false
     @State private var userName: String = ""
     @State private var userBio: String = ""
     @State private var userLocation: String = ""
@@ -34,7 +33,7 @@ struct EditProfileView: View {
     @State private var isSavingProfile: Bool = false
     var onProfilePhotoUpdated: ((UIImage) -> Void)?
     var onProfileUpdated: (() -> Void)?
-
+    
     func saveProfile() {
         isSavingProfile = true
         if let user = Auth.auth().currentUser {
@@ -122,7 +121,7 @@ struct EditProfileView: View {
     func loadImages() {
         isLoadingUserPhoto = true
         isLoadingCredentialImage = true
-
+        
         if let profileImageURL = userProfile.userProfileImage {
             FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { image in
                 if let image = image {
@@ -189,167 +188,89 @@ struct EditProfileView: View {
                     Button(action: {
                         showImagePicker.toggle()
                     }) {
-                        Text("Edit Photo")
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .sheet(isPresented: $showImagePicker) {
-                                ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
-                            }
+                        
+                        if userPhoto != nil {
+                            Text("Edit Photo")
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .sheet(isPresented: $showImagePicker) {
+                                    ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
+                                }
+                        } else {
+                            Text("Add Photo")
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .sheet(isPresented: $showImagePicker) {
+                                    ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
+                                }
+                        }
                     }
                 }
                 .sheet(isPresented: $showImagePicker) {
                     ImagePicker(selectedImage: $userPhoto, imageData: $userPhotoData)
                 }
                 
-                Section(header: Text("Profile")) {
-                    TextField("Name", text: $userName)
-                        .onChange(of: userProfile.userName) { newValue in
-                            userProfile.userName = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                        }
+                Section(header: Text("Name")) {
+                    TextField("Your identity on the platform", text: $userName).onChange(of: userProfile.userName) { newValue in
+                        userProfile.userName = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
+                }
 
-                    TextEditor(text: $userBio)
-                        .frame(height: 100)
-                        .onChange(of: userBio) { newValue in
-                            if newValue.count > 160 {
-                                userBio = String(newValue.prefix(160))
-                            }
-                        }
-                        .onChange(of: userBio) { newValue in
-                            userBio = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                        }
-                        .overlay(
-                            Group {
-                                if userBio.isEmpty {
-                                    Text("Bio")
-                                        .foregroundColor(Color(.placeholderText))
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                                        .padding(.top, 8)
-                                        .padding(.leading, 4)
-                                }
-                            }
-                        )
-                    
-                    TextField("Location", text: $userLocation)
-                        .onChange(of: userProfile.userLocation) { newValue in
-                            userProfile.userLocation = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                        }
-                    
-                    TextField("Website", text: $userWebsite)
+                Section(header: Text("Headline")) {
+                    TextField("Introduce yourself to the community", text: $userBio).onChange(of: userProfile.userBio) { newValue in
+                        userProfile.userName = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
+                }
+
+                Section(header: Text("Location")) {
+                    TextField("Find practitioners near you", text: $userLocation).onChange(of: userProfile.userBio) { newValue in
+                        userProfile.userLocation = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
+                }
+
+                Section(header: Text("URL")) {
+                    TextField("Primary website or social media", text: $userWebsite)
                         .autocapitalization(.none)
                         .onChange(of: userProfile.userWebsite) { newValue in
                             userProfile.userWebsite = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
-                    
-                    Button(action: {
-                        showDatePicker.toggle()
-                    }) {
-                        HStack {
-                            Text("Birthday")
-                                .foregroundColor(Color.secondary)
-                            Spacer()
-                            if isBirthdaySet {
-                                Text("\(userProfile.userBirthday, formatter: FirebaseHelper().dateFormatter)")
-                                    .foregroundColor(Color(.placeholderText))
-                            } else {
-                                Text("Set Date")
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                    }
-                    .onAppear {
-                        isBirthdaySet = !Calendar.current.isDateInToday(userProfile.userBirthday)
-                    }
-                    .onChange(of: userProfile.userBirthday) { _ in
-                        isBirthdaySet = !Calendar.current.isDateInToday(userProfile.userBirthday)
-                    }
-                    .sheet(isPresented: $showDatePicker) {
-                        VStack {
-                            Text("Select Your Birthday")
-                                .font(.headline)
-                            DatePicker("", selection: $userProfile.userBirthday, displayedComponents: .date)
-                                .datePickerStyle(WheelDatePickerStyle())
-                                .labelsHidden()
-                            Button(action: {
-                                isBirthdaySet = true
-                                showDatePicker = false
-                            }) {
-                                Text("Done")
-                                    .padding()
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(10)
-                            }
-                            .padding(.top)
-                        }
-                        .padding()
-                    }
-                }
-                
-                Section(header: Text("Verification"), footer: Text("Earn your verified practitioner badge by uploading an image of your certification.")) {
-                    Button(action: { showCredentialImagePicker.toggle() }) {
-                            if let credentialImage = credentialImage {
-                                Image(uiImage: credentialImage)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 150, height: 150)
-                                    .clipped()
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                            } else if !isLoadingCredentialImage {
-                                Image(systemName: "doc.badge.plus")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 150, height: 150)
-                                    .foregroundColor(.gray)
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                            }
-                            
-                            if isLoadingCredentialImage {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .gray))
-                                    .scaleEffect(1.0)
-                                    .frame(width: 150, height: 150)
-                            }
-                    }
-                    Button(action: {
-                        showCredentialImagePicker.toggle()
-                    }) {
-                        Text("Upload Credential")
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .sheet(isPresented: $showCredentialImagePicker) {
-                                ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
-                            }
-                    }
                 }
             }
             
-            .scrollDismissesKeyboard(.immediately)
             .ignoresSafeArea(.keyboard)
+            .gesture(DragGesture().onChanged({ _ in
+                UIApplication.shared.endEditing()
+            }))
             
             .navigationBarItems(leading: Button("Cancel") {
                 presentationMode.wrappedValue.dismiss()
             }, trailing:
                 Group {
-                    if isSavingProfile {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .gray))
-                    } else {
-                        Button("Save") {
-                            userProfile.userName = userName
-                            userProfile.userBio = userBio
-                            userProfile.userLocation = userLocation
-                            userProfile.userWebsite = userWebsite
-                            saveProfile()
-                            //                self.presentationMode.wrappedValue.dismiss()
-                        }
+                if isSavingProfile {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+                } else {
+                    Button("Save") {
+                        userProfile.userName = userName
+                        userProfile.userBio = userBio
+                        userProfile.userLocation = userLocation
+                        userProfile.userWebsite = userWebsite
+                        saveProfile()
                     }
                 }
-            )
+            })
+            
+            .onAppear {
+                loadImages()
+                userName = userProfile.userName
+                userBio = userProfile.userBio
+                userLocation = userProfile.userLocation
+                userWebsite = userProfile.userWebsite
+            }
         }
-        .onAppear {
-            loadImages()
-            userName = userProfile.userName
-            userBio = userProfile.userBio
-            userLocation = userProfile.userLocation
-            userWebsite = userProfile.userWebsite
-        }
+    }
+}
+
+extension UIApplication {
+    func endEditing() {
+        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
