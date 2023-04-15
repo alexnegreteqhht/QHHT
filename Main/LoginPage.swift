@@ -31,32 +31,33 @@ struct LoginPage: View {
                             print("Error signing in with Apple: \(error.localizedDescription)")
                             return
                         }
-
                         if let user = authResult?.user {
-                            checkIfUserExists(uid: user.uid) { exists in
+                            FirebaseHelper().checkIfUserExists(systemId: user.uid) { exists in
                                 if exists {
                                     print("User document already exists.")
                                 } else {
-                                    let name = (appleIDCredential.fullName?.givenName ?? "") + " " + (appleIDCredential.fullName?.familyName ?? "")
-                                    let email = appleIDCredential.email ?? ""
+                                    let systemId = appleIDCredential.user
+                                    let systemName = (appleIDCredential.fullName?.givenName ?? "") + " " + (appleIDCredential.fullName?.familyName ?? "")
+                                    let systemEmail = appleIDCredential.email ?? ""
+                                    let systemLocation = ""
+                                    let id = Security.generateRandomNonce(length: 48)
+                                    let name = ""
+                                    let email = ""
                                     let location = ""
-                                    let userName = ""
-                                    let userEmail = ""
-                                    let userLocation = ""
-                                    let userPhoneNumber = ""
-                                    let userBio = ""
-                                    let userVerification = ""
-                                    let userCredential = ""
-                                    let userProfileImage = ""
-                                    let userBirthday = Date()
-                                    let userWebsite = ""
-                                    let userJoined = Date()
-                                    createUserDocument(uid: user.uid, name: name, email: email, location: location, userName: userName, userEmail: userEmail, userLocation: userLocation, userPhoneNumber: userPhoneNumber, userBio: userBio, userVerification: userVerification, userCredential: userCredential, userProfileImage: userProfileImage, userBirthday: userBirthday, userWebsite: userWebsite, userJoined: userJoined)
+                                    let phone = ""
+                                    let headline = ""
+                                    let link = ""
+                                    let profileImageURL = ""
+                                    let credentialImageURL = ""
+                                    let birthday = Date()
+                                    let joined = Date()
+                                    let active = Date()
+                                    let verified = false
+                                    FirebaseHelper().createUserDocument(systemId: user.uid, systemName: systemName, systemEmail: systemEmail, systemLocation: systemLocation, id: id, name: name, email: email, location: location, phone: phone, headline: headline, link: link, profileImageURL: profileImageURL, credentialImageURL: credentialImageURL, birthday: birthday, joined: joined, active: active, verified: verified)
                                 }
                             }
                         }
                     }
-
                 case .failure(let error):
                     print("Error with Sign in with Apple: \(error.localizedDescription)")
                 }

@@ -1061,3 +1061,655 @@
 //                    }
 //                }
 //            }
+//
+//func updateUserProfile(userRef: DocumentReference) {
+//    userRef.updateData([
+//        "name": userProfile.name,
+//        "email": userProfile.email,
+//        "location": userProfile.location,
+//        "userName": userProfile.userName,
+//        "userEmail": userProfile.userEmail,
+//        "userLocation": userProfile.userLocation,
+//        "userPhoneNumber": userProfile.userPhoneNumber,
+//        "userBio": userProfile.userBio,
+//        "userVerification": userProfile.userVerification,
+//        "userCredential": userProfile.userCredential ?? "",
+//        "userProfileImage": userProfile.userProfileImage ?? "",
+//        "userWebsite": userProfile.userWebsite,
+//        "userBirthday": GlobalDefaults.dateFormatter.string(from: userProfile.userBirthday),
+//        "userJoined": GlobalDefaults.dateFormatter.string(from: userProfile.userJoined)
+//    ]) { error in
+//        if let error = error {
+//            errorMessage = "Error updating profile: \(error.localizedDescription)"
+//            showAlert.toggle()
+//        } else {
+//            if let credentialURL = userProfile.userCredential {
+//                FirebaseHelper.loadImageFromURL(urlString: credentialURL) { (image: UIImage?) in
+//                    if let image = image {
+//                        credentialImage = image
+//                    }
+//                }
+//            }
+//            if let profileImageURL = userProfile.userProfileImage {
+//                userProfile.profileImageURL = profileImageURL
+//            }
+//            DispatchQueue.main.async {
+//                onProfileUpdated?() // Call the closure here
+//                self.presentationMode.wrappedValue.dismiss()
+//                isSavingProfile = false
+//            }
+//        }
+//    }
+//}
+
+//        isSavingProfile = true
+//        if let user = Auth.auth().currentUser {
+//            let db = Firestore.firestore()
+//            let storage = Storage.storage()
+//            let userRef = db.collection("users").document(user.uid)
+//
+//            let dispatchGroup = DispatchGroup()
+//
+//            userRef.updateData([
+//                "userEmail": userProfile.userEmail,
+//                "userPhoneNumber": userProfile.userPhoneNumber,
+//                "userBirthday": userProfile.userBirthday
+//            ]) { error in
+//                if let error = error {
+//                    errorMessage = "Error updating account: \(error.localizedDescription)"
+//                    showAlert.toggle()
+//                } else {
+//                    presentationMode.wrappedValue.dismiss()
+//                }
+//            }
+//
+//            if let credentialImageData = credentialImageData {
+//                dispatchGroup.enter()
+//                let storageRef = storage.reference().child("credentialImages/\(user.uid).jpg")
+//                let metadata = StorageMetadata()
+//                metadata.contentType = "image/jpeg"
+//
+//                storageRef.putData(credentialImageData, metadata: metadata) { metadata, error in
+//                    if let error = error {
+//                        errorMessage = "Error uploading credential image: \(error.localizedDescription)"
+//                        showAlert.toggle()
+//                    } else {
+//                        storageRef.downloadURL { url, error in
+//                            if let error = error {
+//                                errorMessage = "Error retrieving credential image URL: \(error.localizedDescription)"
+//                                showAlert.toggle()
+//                            } else if let url = url {
+//                                userProfile.userCredential = url.absoluteString
+//                            }
+//                            dispatchGroup.leave()
+//                        }
+//                    }
+//                }
+//            }
+//
+//            dispatchGroup.notify(queue: .main) {
+//                userRef.updateData([
+//                    "userCredential": userProfile.userCredential ?? ""
+//                ]) { error in
+//                    if let error = error {
+//                        errorMessage = "Error updating user credential: \(error.localizedDescription)"
+//                        showAlert.toggle()
+//                    }
+//                }
+//                isSavingProfile = false
+//            }
+//        }
+//    static func loadProfileImage(userProfile: UserProfile, isLoadingProfileImage: Bool, completion: @escaping (UIImage?) -> Void) {
+//
+//        if let userProfileImage = userProfile.userProfileImage, let url = URL(string: userProfileImage) {
+//            let storageRef = Storage.storage().reference(forURL: url.absoluteString)
+//            storageRef.getData(maxSize: 1 * 1024 * 1024) { data, error in
+//                if let error = error {
+//                    print("Error loading profile image: \(error.localizedDescription)")
+//                } else if let data = data {
+//                    completion(UIImage(data: data))
+//                }
+//            }
+//        }
+//    }
+    
+//    static func loadImages(userProfile: UserProfile, isLoadingUserPhoto) {
+//        isLoadingUserPhoto = true
+//
+//        if let profileImageURL = userProfile.userProfileImage {
+//            FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { image in
+//                if let image = image {
+//                    userPhoto = image
+//                }
+//                isLoadingUserPhoto = false
+//            }
+//        } else {
+//            isLoadingUserPhoto = false
+//        }
+//    }
+
+//static func loadCredentialImage(userProfile: UserProfile, isLoadingCredentialImage: Bool, completion: @escaping (UIImage?) -> Void) {
+//    if let userCredential = userProfile.userCredential, let url = URL(string: userCredential) {
+//        let storageRef = Storage.storage().reference(forURL: url.absoluteString)
+//        storageRef.getData(maxSize: 1 * 1024 * 1024) { data, error in
+//            if let error = error {
+//                print("Error loading credential image: \(error.localizedDescription)")
+//            } else if let data = data {
+//                completion(UIImage(data: data))
+//            }
+//        }
+//    }
+//}
+//
+//
+//            isLoadingCredentialImage = true
+//            FirebaseHelper.loadCredentialImage(userProfile: userProfile, isLoadingCredentialImage: isLoadingCredentialImage) { (image: UIImage?) in
+//                if let image = image {
+//                    credentialImage = image
+//                }
+//                isLoadingCredentialImage = false
+//            }
+//
+//
+//            FirebaseHelper.loadImage(urlString: userProfile.userProfileImage) { uiImage in
+//                tempProfileImage = uiImage
+//            }
+//func loadImage(urlString: String?, completion: @escaping (UIImage?) -> Void) {
+//            if let urlString = urlString, let url = URL(string: urlString) {
+//                URLSession.shared.dataTask(with: url) { data, _, _ in
+//                    if let data = data, let uiImage = UIImage(data: data) {
+//                        DispatchQueue.main.async {
+//                            completion(uiImage)
+//                        }
+//                    } else {
+//                        DispatchQueue.main.async {
+//                            completion(nil)
+//                        }
+//                    }
+//                }.resume()
+//            } else {
+//                completion(nil)
+//            }
+//        }
+//
+//FirebaseHelper.loadImage(urlString: userProfileImageURL) { uiImage in
+//    tempProfileImage = uiImage
+//}
+
+//import SwiftUI
+//import Photos
+//import Firebase
+//import FirebaseAuth
+//import FirebaseStorage
+//import FirebaseFirestore
+//
+//struct SettingsView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ProfileView(userProfile: UserProfile(name: "", headline: "", profileImageURL: ""))
+//
+//    }
+//}
+//
+//struct SettingsView: View {
+//    @ObservedObject var userProfile: UserProfile
+//    @Environment(\.presentationMode) private var presentationMode
+//    @State private var showAlert: Bool = false
+//    @State private var errorMessage: String = ""
+//    @State private var showDatePicker = false
+//    @State private var isBirthdaySet = false
+//    @State private var credentialImage: UIImage?
+//    @State private var credentialImageData: Data?
+//    @State private var showCredentialImagePicker = false
+//    @State private var isLoadingCredentialImage: Bool = false
+//    @State private var isSavingProfile: Bool = false
+//
+//    func loadUserBirthday() {
+//        if let user = Auth.auth().currentUser {
+//            let db = Firestore.firestore()
+//            let userRef = db.collection("users").document(user.uid)
+//
+//            userRef.getDocument { document, error in
+//                if let document = document, document.exists {
+//                    if let birthday = document.data()?["birthday"] as? Timestamp {
+//                        DispatchQueue.main.async { // Add this line
+//                            userProfile.birthday = birthday.dateValue()
+//                            isBirthdaySet = !Calendar.current.isDateInToday(userProfile.birthday)
+//                        }
+//                    } else {
+//                        isBirthdaySet = false
+//                    }
+//                } else {
+//                    print("Error fetching user's birthday: \(error?.localizedDescription ?? "Unknown error")")
+//                }
+//            }
+//        }
+//    }
+//
+//    func updateUserSettings(userRef: DocumentReference) {
+//        userRef.updateData([
+//            "email": userProfile.email,
+//            "phone": userProfile.phone,
+//            "birthday": userProfile.birthday
+//        ]) { error in
+//            if let error = error {
+//                errorMessage = "Error updating account: \(error.localizedDescription)"
+//                showAlert.toggle()
+//            } else {
+//                presentationMode.wrappedValue.dismiss()
+//            }
+//        }
+//    }
+//
+//    func saveProfile() {
+//        isSavingProfile = true
+//        if let user = Auth.auth().currentUser {
+//            let userRef = Firestore.firestore().collection("users").document(user.uid)
+//            let dispatchGroup = DispatchGroup()
+//
+//            if let credentialImageData = credentialImageData {
+//                dispatchGroup.enter()
+//                FirebaseHelper.uploadImageToStorage(imageData: credentialImageData, imagePath: "credentialImages/\(user.uid).jpg") { result in
+//                    switch result {
+//                    case .success(let urlString):
+//                        userProfile.credentialImageURL = urlString
+//                    case .failure(let error):
+//                        errorMessage = "Error uploading credential image: \(error.localizedDescription)"
+//                        showAlert.toggle()
+//                    }
+//                    dispatchGroup.leave()
+//                }
+//            }
+//
+//            dispatchGroup.notify(queue: .main) {
+//                updateUserSettings(userRef: userRef)
+//            }
+//        }
+//    }
+//
+//    var body: some View {
+//        NavigationStack {
+//            Form {
+//                Section(header: Text("Birthday"), footer: Text("We use this to improve your experience and give you discounts.")) {
+//                    if isBirthdaySet {
+//                        Text("\(userProfile.userBirthday, formatter: GlobalDefaults.dateFormatter)")
+//                            .foregroundColor(Color(.placeholderText))
+//                    } else {
+//                        Button(action: {
+//                            showDatePicker.toggle()
+//                        }) {
+//                            Text("Add Birthday")
+//                        }
+//                        .onChange(of: userProfile.userBirthday) { _ in
+//                            isBirthdaySet = !Calendar.current.isDateInToday(userProfile.userBirthday)
+//                        }
+//                        .sheet(isPresented: $showDatePicker) {
+//                            VStack {
+//                                Text("Select Your Birthday")
+//                                    .font(.headline)
+//                                DatePicker("", selection: $userProfile.userBirthday, displayedComponents: .date)
+//                                    .datePickerStyle(WheelDatePickerStyle())
+//                                    .labelsHidden()
+//                                Button(action: {
+//                                    isBirthdaySet = true
+//                                    showDatePicker = false
+//                                }) {
+//                                    Text("Done")
+//                                        .padding()
+//                                        .background(Color.blue)
+//                                        .foregroundColor(.white)
+//                                        .cornerRadius(10)
+//                                }
+//                                .padding(.top)
+//                            }
+//                            .padding()
+//                        }
+//                    }
+//                }
+//
+//                Section(header: Text("Security"), footer: Text("We use this to secure your account and send you important updates.")) {
+//                TextField("Email", text: $userProfile.userEmail)
+//                    .autocapitalization(.none)
+//                    .onChange(of: userProfile.userEmail) { newValue in
+//                        userProfile.userEmail = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+//                    }
+//                TextField("Phone", text: $userProfile.userPhoneNumber)
+//                    .onChange(of: userProfile.userPhoneNumber) { newValue in
+//                        userProfile.userPhoneNumber = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+//                    }
+//                }
+//
+//                Section(header: Text("Verification"), footer: Text("Become a verified practitioner by uploading an image of your certification.")) {
+//                    Button(action: { showCredentialImagePicker.toggle() }) {
+//                        ZStack {
+//                            if let credentialImage = credentialImage {
+//                                Image(uiImage: credentialImage)
+//                                    .resizable()
+//                                    .scaledToFill()
+//                                    .frame(width: 150, height: 150)
+//                                    .clipped()
+//                            } else if !isLoadingCredentialImage {
+//                                Image(systemName: "doc.badge.plus")
+//                                    .resizable()
+//                                    .scaledToFit()
+//                                    .frame(width: 150, height: 150)
+//                                    .foregroundColor(.gray)
+//                            }
+//
+//                            if isLoadingCredentialImage {
+//                                ProgressView()
+//                                    .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+//                                    .scaleEffect(1.0)
+//                                    .frame(width: 150, height: 150)
+//                            }
+//                        }
+//                        .frame(maxWidth: .infinity, alignment: .center)
+//                    }
+//                    Button(action: {
+//                        showCredentialImagePicker.toggle()
+//                    }) {
+//                        Text("Upload Credential")
+//                            .frame(maxWidth: .infinity, alignment: .center)
+//                            .sheet(isPresented: $showCredentialImagePicker) {
+//                                ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
+//                            }
+//                    }
+//                }
+//            }
+//
+//            .ignoresSafeArea(.keyboard)
+//            .gesture(DragGesture().onChanged({ _ in
+//                UIApplication.shared.endEditing()
+//            }))
+//
+//                // Last Login
+//
+//                //                Text("Joined: \(userProfile.userJoined, formatter: FirebaseHelper().dateFormatter)")
+//
+//                Button(action: {
+//                    try? Auth.auth().signOut()
+//                }, label: {
+//                    Text("Log Out")
+//                        .foregroundColor(.red)
+//                })
+//                .padding()
+//
+//                Spacer()
+//            }
+//            .navigationBarTitle("Settings", displayMode: .inline)
+//
+//            .navigationBarItems(
+//                leading:
+//                    Button("Cancel") {
+//                        presentationMode.wrappedValue.dismiss()
+//                    },
+//                trailing:
+//                    Group {
+//                        if isSavingProfile {
+//                            ProgressView()
+//                                .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+//                        } else {
+//                            Button("Save") {
+//                                saveProfile()
+//                            }
+//                        }
+//                    }
+//            )
+//            .alert(isPresented: $showAlert) {
+//                Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
+//
+//            }
+//
+//
+//            .onAppear {
+//                isLoadingCredentialImage = true
+//                if let credentialImageURL = userProfile.credentialImageURL {
+//                    FirebaseHelper.loadImageFromURL(urlString: credentialImageURL) { image in
+//                        if let image = image {
+//                            credentialImage = image
+//                        }
+//                        isLoadingCredentialImage = false
+//                    }
+//                } else {
+//                    isLoadingCredentialImage = false
+//                }
+//                loadUserBirthday()
+//            }
+//
+//        }
+//    }
+//}
+//private var headlineSection: some View {
+//    Section(header: Text("Headline")) {
+//        TextField("Introduce yourself to the community", text: $userProfile.headline).onChange(of: userProfile.headline) { newValue in
+//            userProfile.headline = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+//        }
+//    }
+//}
+//import SwiftUI
+//import Photos
+//import Firebase
+//import FirebaseAuth
+//import FirebaseStorage
+//import FirebaseFirestore
+//
+//struct EditProfileView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ProfileView(userProfile: UserProfile(name: "", headline: "", profileImageURL: ""))
+//            .environmentObject(UserProfileData.previewData())
+//    }
+//}
+//
+//struct EditProfileView: View {
+//    @ObservedObject var userProfile: UserProfile
+//    @Environment(\.presentationMode) private var presentationMode
+//    @State var profileImage: UIImage? = nil
+//    @State private var profileImageData: Data? = nil
+//    @State private var showImagePicker: Bool = false
+//    @State private var showAlert: Bool = false
+//    @State private var errorMessage: String = ""
+//    @State private var credentialImage: UIImage?
+//    @State private var credentialImageData: Data?
+//    @State private var showCredentialImagePicker = false
+//    @State private var isLoadingCredentialImage: Bool = false
+//    @State private var showDatePicker = false
+//    @State private var isBirthdaySet = false
+//    @State private var isLoadingUserPhoto: Bool = false
+//    @State private var userName: String = ""
+//    @State private var userBio: String = ""
+//    @State private var userLocation: String = ""
+//    @State private var userWebsite: String = ""
+//    @State private var isSavingProfile: Bool = false
+//    var onProfileUpdated: (() -> Void)?
+//    var onProfileImageUpdated: ((UIImage) -> Bool)?
+//
+//    func updateUserProfile(userRef: DocumentReference) {
+//        userRef.updateData([
+//            "profileImageURL": userProfile.profileImageURL ?? "",
+//            "name": userProfile.name,
+//            "headline": userProfile.headline,
+//            "location": userProfile.location,
+//            "link": userProfile.link,
+//        ]) { error in
+//            if let error = error {
+//                errorMessage = "Error updating profile: \(error.localizedDescription)"
+//                showAlert.toggle()
+//            } else {
+//                if let profileImageURL = userProfile.profileImageURL {
+//                    FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { (image: UIImage?) in
+//                        if let image = image {
+//                            profileImage = image
+//                        }
+//                    }
+//                }
+//                if let profileImageURL = userProfile.profileImageURL {
+//                    userProfile.profileImageURL = profileImageURL
+//                }
+//                DispatchQueue.main.async {
+//                    onProfileUpdated?()
+//                    self.presentationMode.wrappedValue.dismiss()
+//                    isSavingProfile = false
+//                }
+//            }
+//        }
+//    }
+//
+//    func saveProfile() {
+//        isSavingProfile = true
+//        if let user = Auth.auth().currentUser {
+//            let userRef = Firestore.firestore().collection("users").document(user.uid)
+//            let dispatchGroup = DispatchGroup()
+//
+//            if let profileImageData = profileImageData {
+//                dispatchGroup.enter()
+//                FirebaseHelper.uploadImageToStorage(imageData: profileImageData, imagePath: "profileImages/\(user.uid).jpg") { result in
+//                    switch result {
+//                    case .success(let urlString):
+//                        userProfile.profileImageURL = urlString
+//                    case .failure(let error):
+//                        errorMessage = "Error uploading profile image: \(error.localizedDescription)"
+//                        showAlert.toggle()
+//                    }
+//                    dispatchGroup.leave()
+//                }
+//            }
+//            dispatchGroup.notify(queue: .main) {
+//                updateUserProfile(userRef: userRef)
+//            }
+//        }
+//    }
+//
+//    var body: some View {
+//        NavigationStack {
+//            Form {
+//                Section {
+//                    if let profileImage = profileImage {
+//                        Button(action: {
+//                            showImagePicker.toggle()
+//                        }) {
+//                            Image(uiImage: profileImage)
+//                                .resizable()
+//                                .scaledToFill()
+//                                .frame(width: 150, height: 150)
+//                                .clipShape(Circle())
+//                                .frame(maxWidth: .infinity, alignment: .center)
+//                        }
+//                    } else {
+//                        Button(action: {
+//                            showImagePicker.toggle()
+//                        }) {
+//                            ZStack {
+//                                RoundedRectangle(cornerRadius: 75)
+//                                    .foregroundColor(.clear)
+//                                    .frame(width: 150, height: 150)
+//
+//                                if !isLoadingUserPhoto {
+//                                    Image(systemName: "person.crop.circle.fill.badge.plus")
+//                                        .resizable()
+//                                        .scaledToFit()
+//                                        .frame(width: 150, height: 150)
+//                                        .foregroundColor(.gray)
+//                                        .frame(maxWidth: .infinity, alignment: .center)
+//                                } else {
+//                                    ProgressView()
+//                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+//                                }
+//                            }
+//                            .frame(maxWidth: .infinity, alignment: .center)
+//                        }
+//                    }
+//
+//                    Button(action: {
+//                        showImagePicker.toggle()
+//                    }) {
+//
+//                        if profileImage != nil {
+//                            Text("Edit Photo")
+//                                .frame(maxWidth: .infinity, alignment: .center)
+//                                .sheet(isPresented: $showImagePicker) {
+//                                    ImagePicker(selectedImage: $profileImage, imageData: $profileImageData)
+//                                }
+//                        } else {
+//                            Text("Add Photo")
+//                                .frame(maxWidth: .infinity, alignment: .center)
+//                                .sheet(isPresented: $showImagePicker) {
+//                                    ImagePicker(selectedImage: $profileImage, imageData: $profileImageData)
+//                                }
+//                        }
+//                    }
+//                }
+//                .sheet(isPresented: $showImagePicker) {
+//                    ImagePicker(selectedImage: $profileImage, imageData: $profileImageData)
+//                }
+//
+//                Section(header: Text("Name")) {
+//                    TextField("Your identity on the platform", text: $userName).onChange(of: userProfile.userName) { newValue in
+//                        userProfile.userName = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+//                    }
+//                }
+//
+//                Section(header: Text("Headline")) {
+//                    TextField("Introduce yourself to the community", text: $userBio).onChange(of: userProfile.userBio) { newValue in
+//                        userProfile.userBio = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+//                    }
+//                }
+//
+//                Section(header: Text("Location")) {
+//                    TextField("Find practitioners near you", text: $userLocation).onChange(of: userProfile.userLocation) { newValue in
+//                        userProfile.userLocation = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+//                    }
+//                }
+//
+//                Section(header: Text("Link")) {
+//                    TextField("Primary website or social media", text: $userWebsite)
+//                        .autocapitalization(.none)
+//                        .onChange(of: userProfile.userWebsite) { newValue in
+//                            userProfile.userWebsite = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+//                        }
+//                }
+//
+//
+//                .ignoresSafeArea(.keyboard)
+//                .gesture(DragGesture().onChanged({ _ in
+//                    UIApplication.shared.endEditing()
+//                }))
+//
+//                .navigationBarItems(leading: Button("Cancel") {
+//                    presentationMode.wrappedValue.dismiss()
+//                }, trailing:
+//                                        Group {
+//                    if isSavingProfile {
+//                        ProgressView()
+//                            .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+//                    } else {
+//                        Button("Save") {
+//                            userProfile.userName = userName
+//                            userProfile.userBio = userBio
+//                            userProfile.userLocation = userLocation
+//                            userProfile.userWebsite = userWebsite
+//                            saveProfile()
+//                        }
+//                    }
+//                })
+//                .onAppear {
+//                    isLoadingUserPhoto = true
+//                    if let userProfileImageURL = userProfile.userProfileImageURL {
+//                        FirebaseHelper.loadImageFromURL(urlString: userProfileImageURL) { image in
+//                            if let image = image {
+//                                profileImage = image
+//                            }
+//                            isLoadingUserPhoto = false
+//                        }
+//                    } else {
+//                        isLoadingUserPhoto = false
+//                    }
+//
+//                    userName = userProfile.userName
+//                    userBio = userProfile.userBio
+//                    userLocation = userProfile.userLocation
+//                    userWebsite = userProfile.userWebsite
+//                }
+//            }
+//        }
+//    }
+//}
+

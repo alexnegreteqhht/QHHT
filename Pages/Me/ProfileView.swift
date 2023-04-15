@@ -5,13 +5,15 @@ import Combine
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileView()
+        ProfileView(userProfile: UserProfile(name: "", headline: "", profileImageURL: ""))
             .environmentObject(UserProfileData.previewData())
     }
 }
 
 struct ProfileView: View {
+    @ObservedObject var userProfile: UserProfile
     @EnvironmentObject var userProfileData: UserProfileData
+    @State private var userProfileImage: UIImage? = nil
     @State private var tempProfileImage: UIImage? = nil
     @State private var hasProfileImageLoaded = false
     @State private var isEditProfilePresented = false
@@ -24,16 +26,15 @@ struct ProfileView: View {
             GeometryReader { geometry in
                 ScrollView {
                     VStack(alignment: .center, spacing: 16) {
-                        
                         if let userProfile = userProfileData.userProfile {
                             ProfileImage(userProfile: userProfile, tempProfileImage: $tempProfileImage, hasProfileImageLoaded: $hasProfileImageLoaded, isEditProfilePresented: $isEditProfilePresented)
                                 .frame(width: profileImageSize, height: profileImageSize)
                             
-                            Text(userProfile.userName)
+                            Text(userProfile.name)
                                 .font(.title)
                                 .fontWeight(.bold)
                             
-                            Text(userProfile.userBio)
+                            Text(userProfile.headline)
                                 .font(.callout)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
@@ -54,8 +55,8 @@ struct ProfileView: View {
     }
     
     private func loadProfileImage() {
-        if let userProfile = userProfileData.userProfile {
-            FirebaseHelper.shared.loadImage(urlString: userProfile.userProfileImage) { uiImage in
+        if let profileImageURL = userProfile.profileImageURL {
+            FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { uiImage in
                 tempProfileImage = uiImage
             }
         }
@@ -78,7 +79,7 @@ struct ProfileImage: View {
                     .frame(width: 150, height: 150)
                     .clipShape(Circle())
             } else {
-                if let urlString = userProfile.userProfileImage, !urlString.isEmpty, let url = URL(string: urlString) {
+                if let urlString = userProfile.profileImageURL, !urlString.isEmpty, let url = URL(string: urlString) {
                     AsyncImage(url: url) { image in
                         image.resizable()
                     } placeholder: {
@@ -89,8 +90,9 @@ struct ProfileImage: View {
                     .frame(width: 150, height: 150)
                     .clipShape(Circle())
                     .onAppear {
-                        if let userProfile = userProfileData.userProfile, let userProfileImage = userProfile.userProfileImage {
-                            FirebaseHelper.shared.loadImage(urlString: userProfileImage) { uiImage in
+                        if let userProfile = userProfileData.userProfile, let userProfileImageURL = userProfile.profileImageURL {
+                            
+                            FirebaseHelper.loadImageFromURL(urlString: userProfileImageURL) { uiImage in
                                 tempProfileImage = uiImage
                             }
                         }
@@ -130,9 +132,12 @@ struct EditProfileButton: View {
         }
         .padding(.horizontal, 20)
         .sheet(isPresented: $isEditProfilePresented) {
-            EditProfileView(userProfile: userProfile, userPhoto: tempProfileImage, onProfilePhotoUpdated: { newImage in
-                tempProfileImage = newImage
-            }, onProfileUpdated: onProfileUpdated)
+            
+            EditProfileView(userProfile: userProfile, profileImage: tempProfileImage)
+            
+//            EditProfileView(userProfile: userProfile, profileImage: tempProfileImage, onProfileUpdated: { newImage in
+//                tempProfileImage = newImage
+//            }, onProfileImageUpdated: onProfileUpdated)
         }
     }
 }

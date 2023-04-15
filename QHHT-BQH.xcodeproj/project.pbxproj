@@ -16,6 +16,9 @@
 		5D0FD05029E7E5D30038A72B /* Main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0FD04F29E7E5D30038A72B /* Main.swift */; };
 		5D0FD05629E7EC460038A72B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5D0FD05529E7EC460038A72B /* GoogleService-Info.plist */; };
 		5D0FD05829E7ED920038A72B /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5D0FD05729E7ED920038A72B /* Launch Screen.storyboard */; };
+		5D3578EE29EA7FCE00E182F4 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D3578ED29EA7FCE00E182F4 /* Extensions.swift */; };
+		5D3578F029EA835F00E182F4 /* GlobalDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D3578EF29EA835F00E182F4 /* GlobalDefaults.swift */; };
+		5D3578F229EA9CCF00E182F4 /* Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D3578F129EA9CCF00E182F4 /* Security.swift */; };
 		5D44C4D129DD301E004EEDF2 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 5D44C4D029DD301E004EEDF2 /* FirebaseAnalytics */; };
 		5D44C4D329DD301E004EEDF2 /* FirebaseAnalyticsOnDeviceConversion in Frameworks */ = {isa = PBXBuildFile; productRef = 5D44C4D229DD301E004EEDF2 /* FirebaseAnalyticsOnDeviceConversion */; };
 		5D44C4D529DD301E004EEDF2 /* FirebaseAnalyticsSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 5D44C4D429DD301E004EEDF2 /* FirebaseAnalyticsSwift */; };
@@ -50,7 +53,6 @@
 		5DC7382529E7BE8100BEF53F /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC7382429E7BE8100BEF53F /* ImagePicker.swift */; };
 		5DDDD7FF29CE873C00572BE0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DDDD7FE29CE873C00572BE0 /* Assets.xcassets */; };
 		5DDDD80329CE873C00572BE0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DDDD80229CE873C00572BE0 /* Preview Assets.xcassets */; };
-		5DDDD80A29CE939500572BE0 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD80929CE939500572BE0 /* HomeView.swift */; };
 		5DDDD80C29CE93D800572BE0 /* DirectoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD80B29CE93D800572BE0 /* DirectoryView.swift */; };
 		5DDDD80E29CE941000572BE0 /* ForumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD80D29CE941000572BE0 /* ForumView.swift */; };
 		5DDDD81229CE945100572BE0 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDDD81129CE945100572BE0 /* ProfileView.swift */; };
@@ -67,6 +69,9 @@
 		5D0FD05329E7EB7A0038A72B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5D0FD05529E7EC460038A72B /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
 		5D0FD05729E7ED920038A72B /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		5D3578ED29EA7FCE00E182F4 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		5D3578EF29EA835F00E182F4 /* GlobalDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalDefaults.swift; sourceTree = "<group>"; };
+		5D3578F129EA9CCF00E182F4 /* Security.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Security.swift; sourceTree = "<group>"; };
 		5D63002629E398CF00BF91E9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		5D93134529DE9E8E001B5E6E /* Archive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Archive.swift; sourceTree = "<group>"; };
 		5D9F09ED29E51E4100B6C666 /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
@@ -76,7 +81,6 @@
 		5DDDD7FE29CE873C00572BE0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5DDDD80029CE873C00572BE0 /* QHHT.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QHHT.entitlements; sourceTree = "<group>"; };
 		5DDDD80229CE873C00572BE0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		5DDDD80929CE939500572BE0 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		5DDDD80B29CE93D800572BE0 /* DirectoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryView.swift; sourceTree = "<group>"; };
 		5DDDD80D29CE941000572BE0 /* ForumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForumView.swift; sourceTree = "<group>"; };
 		5DDDD81129CE945100572BE0 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; wrapsLines = 0; };
@@ -125,6 +129,9 @@
 			children = (
 				5D9F09EF29E6139800B6C666 /* FirebaseHelper.swift */,
 				5DC7382429E7BE8100BEF53F /* ImagePicker.swift */,
+				5D3578ED29EA7FCE00E182F4 /* Extensions.swift */,
+				5D3578EF29EA835F00E182F4 /* GlobalDefaults.swift */,
+				5D3578F129EA9CCF00E182F4 /* Security.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -144,26 +151,49 @@
 		5D0FD04E29E7E53F0038A72B /* Pages */ = {
 			isa = PBXGroup;
 			children = (
-				5DDDD80929CE939500572BE0 /* HomeView.swift */,
-				5DDDD80B29CE93D800572BE0 /* DirectoryView.swift */,
-				5DDDD80D29CE941000572BE0 /* ForumView.swift */,
+				5D3578F329EAABAC00E182F4 /* Me */,
+				5D3578F629EAABE500E182F4 /* Directory */,
+				5D3578F729EAABF300E182F4 /* Forum */,
+			);
+			path = Pages;
+			sourceTree = "<group>";
+		};
+		5D3578F329EAABAC00E182F4 /* Me */ = {
+			isa = PBXGroup;
+			children = (
 				5DDDD81129CE945100572BE0 /* ProfileView.swift */,
 				5D9F09ED29E51E4100B6C666 /* EditProfileView.swift */,
 				5D63002629E398CF00BF91E9 /* SettingsView.swift */,
 			);
-			path = Pages;
+			path = Me;
+			sourceTree = "<group>";
+		};
+		5D3578F629EAABE500E182F4 /* Directory */ = {
+			isa = PBXGroup;
+			children = (
+				5DDDD80B29CE93D800572BE0 /* DirectoryView.swift */,
+			);
+			path = Directory;
+			sourceTree = "<group>";
+		};
+		5D3578F729EAABF300E182F4 /* Forum */ = {
+			isa = PBXGroup;
+			children = (
+				5DDDD80D29CE941000572BE0 /* ForumView.swift */,
+			);
+			path = Forum;
 			sourceTree = "<group>";
 		};
 		5DDDD7EE29CE873B00572BE0 = {
 			isa = PBXGroup;
 			children = (
-				5DDDD7F929CE873B00572BE0 /* App */,
-				5D0FD04E29E7E53F0038A72B /* Pages */,
-				5D0FD04729E7E4610038A72B /* Main */,
-				5D0FD03E29E7E3890038A72B /* Utilities */,
 				5D0FD05529E7EC460038A72B /* GoogleService-Info.plist */,
 				5D0FD05329E7EB7A0038A72B /* Info.plist */,
+				5DDDD7F929CE873B00572BE0 /* App */,
 				5DDDD81529CE9F9400572BE0 /* Data */,
+				5D0FD03E29E7E3890038A72B /* Utilities */,
+				5D0FD04729E7E4610038A72B /* Main */,
+				5D0FD04E29E7E53F0038A72B /* Pages */,
 				5DDDD7F829CE873B00572BE0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -314,15 +344,17 @@
 				5DDDD80E29CE941000572BE0 /* ForumView.swift in Sources */,
 				5D0FD04629E7E4480038A72B /* AuthStateDelegate.swift in Sources */,
 				5DDDD80C29CE93D800572BE0 /* DirectoryView.swift in Sources */,
+				5D3578F229EA9CCF00E182F4 /* Security.swift in Sources */,
 				5D0FD04A29E7E4A30038A72B /* ContentView.swift in Sources */,
 				5DDDD81229CE945100572BE0 /* ProfileView.swift in Sources */,
-				5DDDD80A29CE939500572BE0 /* HomeView.swift in Sources */,
 				5D0FD04D29E7E50F0038A72B /* LoginPage.swift in Sources */,
 				5D0FD04229E7E4010038A72B /* AppDelegate.swift in Sources */,
 				5D0FD05029E7E5D30038A72B /* Main.swift in Sources */,
 				5D9F09F029E6139800B6C666 /* FirebaseHelper.swift in Sources */,
+				5D3578F029EA835F00E182F4 /* GlobalDefaults.swift in Sources */,
 				5DC7382529E7BE8100BEF53F /* ImagePicker.swift in Sources */,
 				5D63002729E398CF00BF91E9 /* SettingsView.swift in Sources */,
+				5D3578EE29EA7FCE00E182F4 /* Extensions.swift in Sources */,
 				5D0FD04029E7E3D00038A72B /* UserProfile.swift in Sources */,
 				5D0FD04429E7E42C0038A72B /* AppData.swift in Sources */,
 			);

@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 
 struct ContentView: View {
+    @ObservedObject var userProfile: UserProfile
     @EnvironmentObject var authStateDelegate: AuthStateDelegate
     @StateObject private var userProfileData = UserProfileData()
     @StateObject var appData = AppData()
@@ -27,7 +28,7 @@ struct ContentView: View {
                 .tag(1)
                 .environmentObject(appData)
                
-            ProfileView()
+            ProfileView(userProfile: userProfile)
                 .navigationBarTitle("Me", displayMode: .automatic)
                 .tabItem {
                     Image(systemName: "person.crop.circle")
@@ -37,7 +38,7 @@ struct ContentView: View {
                 .environmentObject(appData)
         }
         .onAppear {
-            FirebaseHelper.shared.fetchUserData { fetchedUserProfile in
+            FirebaseHelper().fetchUserData { fetchedUserProfile in
                 userProfileData.userProfile = fetchedUserProfile
             }
         }
