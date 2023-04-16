@@ -1812,3 +1812,9 @@
 //        .sheet(isPresented: $showCredentialImagePicker) {
 //            ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
 //        }
+
+
+//if newValue.count > 160 {
+//    userProfile.headline = String(newValue.prefix(160))
+//}
+//userProfile.headline = trimmingCharacters(in: .whitespacesAndNewlines)

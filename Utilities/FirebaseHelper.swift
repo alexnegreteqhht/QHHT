@@ -120,22 +120,19 @@ struct FirebaseHelper {
         }
     }
     
-    static func loadImageFromURL(urlString: String, completion: @escaping (UIImage?) -> Void) {
-        guard let url = URL(string: urlString) else {
-            completion(nil)
-            return
+    static func loadImageFromURL(urlString: String, completion: @escaping (UIImage?, Error?) -> Void) {
+        if let url = URL(string: urlString) {
+            URLSession.shared.dataTask(with: url) { data, response, error in
+                if let error = error {
+                    completion(nil, error)
+                } else if let data = data {
+                    completion(UIImage(data: data), nil)
+                } else {
+                    completion(nil, nil)
+                }
+            }.resume()
+        } else {
+            completion(nil, NSError(domain: "FirebaseHelper", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]))
         }
-        
-        URLSession.shared.dataTask(with: url) { data, _, _ in
-            if let data = data, let image = UIImage(data: data) {
-                DispatchQueue.main.async {
-                    completion(image)
-                }
-            } else {
-                DispatchQueue.main.async {
-                    completion(nil)
-                }
-            }
-        }.resume()
     }
 }

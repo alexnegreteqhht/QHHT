@@ -23,15 +23,25 @@ struct SettingsView: View {
     @State private var showCredentialImagePicker = false
     @State private var isLoadingCredentialImage: Bool = false
     @State private var isSavingProfile: Bool = false
+    @State private var isLoading = false
     
     func loadSettings() {
         isLoadingCredentialImage = true
         if let credentialImageURL = userProfile.credentialImageURL {
-            FirebaseHelper.loadImageFromURL(urlString: credentialImageURL) { image in
-                if let image = image {
-                    credentialImage = image
+            FirebaseHelper.loadImageFromURL(urlString: credentialImageURL) { uiImage, error in
+                if let error = error {
+                    print("Error loading profile image:", error.localizedDescription)
+                } else if let uiImage = uiImage {
+                    print("Profile image loaded successfully")
+                    DispatchQueue.main.async {
+                        credentialImage = uiImage
+                    }
+                } else {
+                    print("Profile image not loaded, no error returned")
                 }
-                isLoadingCredentialImage = false
+                DispatchQueue.main.async {
+                    isLoading = false
+                }
             }
         } else {
             isLoadingCredentialImage = false
@@ -186,7 +196,7 @@ struct SettingsView: View {
     }
     
     private var verificationSection: some View {
-        Section {
+        Section(header: Text("Verification"), footer: Text("Become a verified practitioner by uploading an image of your certification.")) {
             if let credentialImage = credentialImage {
                 Button(action: {
                     showCredentialImagePicker.toggle()

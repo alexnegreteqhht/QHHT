@@ -18,6 +18,8 @@ struct ProfileView: View {
     @State private var hasProfileImageLoaded = false
     @State private var isEditProfilePresented = false
     @State private var isSettingsPresented = false
+    @State private var isLoading = false
+    @State private var profileImage: UIImage? = nil
     
     private let profileImageSize: CGFloat = 150
     
@@ -27,7 +29,7 @@ struct ProfileView: View {
                 ScrollView {
                     VStack(alignment: .center, spacing: 16) {
                         if let userProfile = userProfileData.userProfile {
-                            ProfileImage(userProfile: userProfile, isEditProfilePresented: $isEditProfilePresented)
+                            ProfileImage(userProfile: userProfile, profileImage: $profileImage, isEditProfilePresented: $isEditProfilePresented)
                                 .frame(width: profileImageSize, height: profileImageSize)
                             
                             Text(userProfile.name)
@@ -62,14 +64,32 @@ struct ProfileView: View {
                     .navigationBarTitle("Profile", displayMode: .large)
                 }
             }
-            .onAppear(perform: loadProfileImage)
+            .onAppear(perform: {
+                if profileImage == nil {
+                    loadProfileImage()
+                }
+            })
         }
     }
     
     private func loadProfileImage() {
-        if let profileImageURL = userProfile.profileImageURL {
-            FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { uiImage in
-                userProfileData.profileImage = uiImage
+        if let userProfile = userProfileData.userProfile, let profileImageURL = userProfile.profileImageURL {
+            print("Loading profile image from URL:", profileImageURL)
+            isLoading = true
+            FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { uiImage, error in
+                if let error = error {
+                    print("Error loading profile image:", error.localizedDescription)
+                } else if let uiImage = uiImage {
+                    print("Profile image loaded successfully")
+                    DispatchQueue.main.async {
+                        profileImage = uiImage
+                    }
+                } else {
+                    print("Profile image not loaded, no error returned")
+                }
+                DispatchQueue.main.async {
+                    isLoading = false
+                }
             }
         }
     }
@@ -78,21 +98,17 @@ struct ProfileView: View {
 struct ProfileImage: View {
     @EnvironmentObject var userProfileData: UserProfileData
     @ObservedObject var userProfile: UserProfile
+    @Binding var profileImage: UIImage?
     @Binding var isEditProfilePresented: Bool
-    @State private var isLoading = false
     
     var body: some View {
         Group {
-            if let profileImage = userProfileData.profileImage {
+            if let profileImage = profileImage {
                 Image(uiImage: profileImage)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 150, height: 150)
                     .clipShape(Circle())
-            } else if isLoading {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .gray))
-                    .frame(width: 150, height: 150)
             } else {
                 Button(action: {
                     isEditProfilePresented.toggle()
@@ -102,15 +118,6 @@ struct ProfileImage: View {
                         .scaledToFit()
                         .frame(width: 150, height: 150)
                         .foregroundColor(.gray)
-                }
-            }
-        }
-        .onAppear {
-            if userProfileData.profileImage == nil, let userProfileImageURL = userProfile.profileImageURL {
-                isLoading = true
-                FirebaseHelper.loadImageFromURL(urlString: userProfileImageURL) { uiImage in
-                    userProfileData.profileImage = uiImage
-                    isLoading = false
                 }
             }
         }

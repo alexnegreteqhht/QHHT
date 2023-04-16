@@ -34,6 +34,7 @@ struct EditProfileView: View {
     @State private var isSavingProfile: Bool = false
     var onProfileUpdated: (() -> Void)?
     var onProfileImageUpdated: ((UIImage) -> Bool)?
+    @State private var isLoading = false
     
     func updateUserProfile(userRef: DocumentReference) {
         userRef.updateData([
@@ -48,9 +49,19 @@ struct EditProfileView: View {
                 showAlert.toggle()
             } else {
                 if let profileImageURL = userProfile.profileImageURL {
-                    FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { (image: UIImage?) in
-                        if let image = image {
-                            profileImage = image
+                    FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { uiImage, error in
+                        if let error = error {
+                            print("Error loading profile image:", error.localizedDescription)
+                        } else if let uiImage = uiImage {
+                            print("Profile image loaded successfully")
+                            DispatchQueue.main.async {
+                                profileImage = uiImage
+                            }
+                        } else {
+                            print("Profile image not loaded, no error returned")
+                        }
+                        DispatchQueue.main.async {
+                            isLoading = false
                         }
                     }
                 }
@@ -206,12 +217,21 @@ struct EditProfileView: View {
             })
             .onAppear {
                 isLoadingUserPhoto = true
-                if let userProfileImageURL = userProfile.profileImageURL {
-                    FirebaseHelper.loadImageFromURL(urlString: userProfileImageURL) { image in
-                        if let image = image {
-                            profileImage = image
+                if let profileImageURL = userProfile.profileImageURL {
+                    FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { uiImage, error in
+                        if let error = error {
+                            print("Error loading profile image:", error.localizedDescription)
+                        } else if let uiImage = uiImage {
+                            print("Profile image loaded successfully")
+                            DispatchQueue.main.async {
+                                profileImage = uiImage
+                            }
+                        } else {
+                            print("Profile image not loaded, no error returned")
                         }
-                        isLoadingUserPhoto = false
+                        DispatchQueue.main.async {
+                            isLoading = false
+                        }
                     }
                 } else {
                     isLoadingUserPhoto = false
