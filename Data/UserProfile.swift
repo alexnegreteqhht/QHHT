@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 class UserProfile: ObservableObject, Identifiable {
     @Published var systemId: String = ""
@@ -34,6 +35,7 @@ class UserProfile: ObservableObject, Identifiable {
 
 class UserProfileData: ObservableObject {
     @Published var userProfile: UserProfile?
+    @Published var profileImage: UIImage?
     
     static func previewData() -> UserProfileData {
         let userProfileData = UserProfileData()

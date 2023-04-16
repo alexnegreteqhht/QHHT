@@ -27,7 +27,7 @@ struct ProfileView: View {
                 ScrollView {
                     VStack(alignment: .center, spacing: 16) {
                         if let userProfile = userProfileData.userProfile {
-                            ProfileImage(userProfile: userProfile, tempProfileImage: $tempProfileImage, hasProfileImageLoaded: $hasProfileImageLoaded, isEditProfilePresented: $isEditProfilePresented)
+                            ProfileImage(userProfile: userProfile, isEditProfilePresented: $isEditProfilePresented)
                                 .frame(width: profileImageSize, height: profileImageSize)
                             
                             Text(userProfile.name)
@@ -69,7 +69,7 @@ struct ProfileView: View {
     private func loadProfileImage() {
         if let profileImageURL = userProfile.profileImageURL {
             FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { uiImage in
-                tempProfileImage = uiImage
+                userProfileData.profileImage = uiImage
             }
         }
     }
@@ -78,47 +78,39 @@ struct ProfileView: View {
 struct ProfileImage: View {
     @EnvironmentObject var userProfileData: UserProfileData
     @ObservedObject var userProfile: UserProfile
-    @Binding var tempProfileImage: UIImage?
-    @Binding var hasProfileImageLoaded: Bool
     @Binding var isEditProfilePresented: Bool
+    @State private var isLoading = false
     
     var body: some View {
         Group {
-            if let tempImage = tempProfileImage {
-                Image(uiImage: tempImage)
+            if let profileImage = userProfileData.profileImage {
+                Image(uiImage: profileImage)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 150, height: 150)
                     .clipShape(Circle())
-            } else {
-                if let urlString = userProfile.profileImageURL, !urlString.isEmpty, let url = URL(string: urlString) {
-                    AsyncImage(url: url) { image in
-                        image.resizable()
-                    } placeholder: {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .gray))
-                    }
-                    .scaledToFill()
+            } else if isLoading {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .gray))
                     .frame(width: 150, height: 150)
-                    .clipShape(Circle())
-                    .onAppear {
-                        if let userProfile = userProfileData.userProfile, let userProfileImageURL = userProfile.profileImageURL {
-                            
-                            FirebaseHelper.loadImageFromURL(urlString: userProfileImageURL) { uiImage in
-                                tempProfileImage = uiImage
-                            }
-                        }
-                    }
-                } else {
-                    Button(action: {
-                        isEditProfilePresented.toggle()
-                    }) {
-                        Image(systemName: "person.crop.circle.fill.badge.plus")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 150, height: 150)
-                            .foregroundColor(.gray)
-                    }
+            } else {
+                Button(action: {
+                    isEditProfilePresented.toggle()
+                }) {
+                    Image(systemName: "person.crop.circle.fill.badge.plus")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 150, height: 150)
+                        .foregroundColor(.gray)
+                }
+            }
+        }
+        .onAppear {
+            if userProfileData.profileImage == nil, let userProfileImageURL = userProfile.profileImageURL {
+                isLoading = true
+                FirebaseHelper.loadImageFromURL(urlString: userProfileImageURL) { uiImage in
+                    userProfileData.profileImage = uiImage
+                    isLoading = false
                 }
             }
         }
@@ -146,10 +138,6 @@ struct EditProfileButton: View {
         .sheet(isPresented: $isEditProfilePresented) {
             
             EditProfileView(userProfile: userProfile, profileImage: tempProfileImage)
-            
-//            EditProfileView(userProfile: userProfile, profileImage: tempProfileImage, onProfileUpdated: { newImage in
-//                tempProfileImage = newImage
-//            }, onProfileImageUpdated: onProfileUpdated)
         }
     }
 }
