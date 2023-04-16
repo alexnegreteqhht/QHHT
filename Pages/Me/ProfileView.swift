@@ -5,7 +5,7 @@ import Combine
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileView(userProfile: UserProfile(name: "", headline: "", profileImageURL: ""))
+        ProfileView(userProfile: UserProfile(name: "", headline: "", location: "Anytown, USA", link: "https://www.apple.com", profileImageURL: ""))
             .environmentObject(UserProfileData.previewData())
     }
 }
@@ -34,11 +34,23 @@ struct ProfileView: View {
                                 .font(.title)
                                 .fontWeight(.bold)
                             
-                            Text(userProfile.headline)
+                            Text("👋 " + userProfile.headline)
                                 .font(.callout)
                                 .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal)
+
+                            Text("📍 " + userProfile.location)
+                                .font(.callout)
+                                .foregroundColor(.secondary)
+                            
+                            Button(action: {
+                                if let url = URL(string: userProfile.link) {
+                                    UIApplication.shared.open(url)
+                                }
+                            }) {
+                                Text("🔗 " + TextHelper.cleanURLString(userProfile.link))
+                                    .font(.callout)
+                                    .foregroundColor(.accentColor)
+                            }
                             
                             EditProfileButton(isEditProfilePresented: $isEditProfilePresented, userProfile: userProfile, tempProfileImage: $tempProfileImage, onProfileUpdated: loadProfileImage)
                             

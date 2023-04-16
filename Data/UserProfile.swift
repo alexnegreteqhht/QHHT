@@ -23,9 +23,11 @@ class UserProfile: ObservableObject, Identifiable {
 
     }
     
-    init(name: String, headline: String, profileImageURL: String?) {
+    init(name: String, headline: String, location: String, link: String, profileImageURL: String?) {
         self.name = name
         self.headline = headline
+        self.location = location
+        self.link = link
         self.profileImageURL = profileImageURL
     }
 }
@@ -35,7 +37,7 @@ class UserProfileData: ObservableObject {
     
     static func previewData() -> UserProfileData {
         let userProfileData = UserProfileData()
-        userProfileData.userProfile = UserProfile(name: "John Doe", headline: "SwiftUI enthusiast", profileImageURL: "")
+        userProfileData.userProfile = UserProfile(name: "John Doe", headline: "SwiftUI enthusiast", location: "Anytown, USA", link: "https://www.apple.com", profileImageURL: "")
         return userProfileData
     }
 }

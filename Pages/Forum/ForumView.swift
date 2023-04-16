@@ -7,16 +7,13 @@ struct ForumView_Previews: PreviewProvider {
     }
 }
 
-// View for the About tab
 struct ForumView: View {
-    // Get the instance of AppData from the environment
     @EnvironmentObject var appData: AppData
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                // Placeholder text
                 Text("Get to know the community")
                     .font(.body)
                     .foregroundColor(.primary)

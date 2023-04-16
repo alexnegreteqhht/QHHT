@@ -10,7 +10,7 @@ struct QHHTBQHApp: App {
         WindowGroup {
             NavigationView {
                 if authStateDelegate.isAuthenticated {
-                    ContentView(userProfile: UserProfile(name: "", headline: "", profileImageURL: ""))
+                    ContentView(userProfile: UserProfile(name: "", headline: "", location: "", link: "", profileImageURL: ""))
                     .background(Color(.clear))
                 } else {
                     LoginPage()

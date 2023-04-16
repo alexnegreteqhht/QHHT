@@ -1713,3 +1713,102 @@
 //    }
 //}
 
+
+//    private var verificationSection: some View {
+//        Section(header: Text("Verification"), footer: Text("Become a verified practitioner by uploading an image of your certification.")) {
+//            Button(action: { showCredentialImagePicker.toggle() }) {
+//                ZStack {
+//                    if let credentialImage = credentialImage {
+//                        Image(uiImage: credentialImage)
+//                            .resizable()
+//                            .scaledToFill()
+//                            .frame(width: 150, height: 150)
+//                            .clipped()
+//                    } else if !isLoadingCredentialImage {
+//                        Image(systemName: "doc.badge.plus")
+//                            .resizable()
+//                            .scaledToFit()
+//                            .frame(width: 150, height: 150)
+//                            .foregroundColor(.gray)
+//                    }
+//
+//                    if isLoadingCredentialImage {
+//                        ProgressView()
+//                            .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+//                            .scaleEffect(1.0)
+//                            .frame(width: 150, height: 150)
+//                    }
+//                }
+//                .frame(maxWidth: .infinity, alignment: .center)
+//            }
+//            Button(action: {
+//                showCredentialImagePicker.toggle()
+//            }) {
+//                Text("Upload Credential")
+//                    .frame(maxWidth: .infinity, alignment: .center)
+//                    .sheet(isPresented: $showCredentialImagePicker) {
+//                        ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
+//                    }
+//            }
+//        }
+//    }
+    
+//    private var verificationSection: some View {
+//        Section {
+//            if let credentialImage = credentialImage {
+//                Button(action: {
+//                    showCredentialImagePicker.toggle()
+//                }) {
+//                    Image(uiImage: credentialImage)
+//                        .resizable()
+//                        .scaledToFill()
+//                        .frame(width: 150, height: 150)
+//                        .clipShape(Circle())
+//                        .frame(maxWidth: .infinity, alignment: .center)
+//                }
+//            } else {
+//                Button(action: {
+//                    showCredentialImagePicker.toggle()
+//                }) {
+//                    ZStack {
+//                        RoundedRectangle(cornerRadius: 75)
+//                            .foregroundColor(.clear)
+//                            .frame(width: 150, height: 150)
+//
+//                        if !isLoadingCredentialImage {
+//                            Image(systemName: "doc.badge.plus")
+//                                .resizable()
+//                                .scaledToFit()
+//                                .frame(width: 150, height: 150)
+//                                .foregroundColor(.gray)
+//                                .frame(maxWidth: .infinity, alignment: .center)
+//                        } else {
+//                            ProgressView()
+//                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+//                        }
+//                    }
+//                    .frame(maxWidth: .infinity, alignment: .center)
+//                }
+//            }
+//
+//            Button(action: {
+//                showCredentialImagePicker.toggle()
+//            }) {
+//                if credentialImage != nil {
+//                    Text("Edit Image")
+//                        .frame(maxWidth: .infinity, alignment: .center)
+//                        .sheet(isPresented: $showCredentialImagePicker) {
+//                            ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
+//                        }
+//                } else {
+//                    Text("Add Image")
+//                        .frame(maxWidth: .infinity, alignment: .center)
+//                        .sheet(isPresented: $credentialImagePicker) {
+//                            ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
+//                        }
+//                }
+//            }
+//        }
+//        .sheet(isPresented: $showCredentialImagePicker) {
+//            ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
+//        }
