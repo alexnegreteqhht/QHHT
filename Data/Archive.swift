@@ -1813,8 +1813,48 @@
 //            ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
 //        }
 
-
+//
 //if newValue.count > 160 {
 //    userProfile.headline = String(newValue.prefix(160))
 //}
 //userProfile.headline = trimmingCharacters(in: .whitespacesAndNewlines)
+//
+//Text(userProfile.name)
+//    .font(.title)
+//    .fontWeight(.bold)
+//
+//if userProfile.headline != "" {
+//    Text("👋 " + userProfile.headline)
+//        .font(.callout)
+//        .foregroundColor(.secondary)
+//} else {
+//    Text(userProfile.headline)
+//        .font(.callout)
+//        .foregroundColor(.secondary)
+//}
+//
+//if userProfile.location != "" {
+//    Text("📍 " + userProfile.location)
+//        .font(.callout)
+//        .foregroundColor(.secondary)
+//} else {
+//    Text(userProfile.location)
+//        .font(.callout)
+//        .foregroundColor(.secondary)
+//}
+//
+//if userProfile.link != "" {
+//    Button(action: {
+//        if let url = URL(string: userProfile.link) {
+//            UIApplication.shared.open(url)
+//        }
+//    }) {
+//        Text("🔗 " + TextHelper.cleanURLString(userProfile.link))
+//            .font(.callout)
+//            .foregroundColor(.accentColor)
+//    }
+//} else {
+//    Text(userProfile.link)
+//        .font(.callout)
+//        .foregroundColor(.secondary)
+//}

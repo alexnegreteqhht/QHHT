@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import Photos
 import Firebase
@@ -35,6 +36,8 @@ struct EditProfileView: View {
     var onProfileUpdated: (() -> Void)?
     var onProfileImageUpdated: ((UIImage) -> Bool)?
     @State private var isLoading = false
+    @State private var hasChanges = false
+    @State private var isSaveDisabled = true
     
     func updateUserProfile(userRef: DocumentReference) {
         userRef.updateData([
@@ -166,18 +169,43 @@ struct EditProfileView: View {
     private var nameSection: some View {
         Section(header: Text("Name")) {
             TextField("Your identity on the platform", text: $userProfile.name)
+            .onChange(of: userProfile.name) { newValue in
+                hasChanges = true
+                updateSaveButtonState()
+            }
         }
     }
     
     private var headlineSection: some View {
         Section(header: Text("Headline")) {
-            TextField("Introduce yourself to the community", text: $userProfile.headline)
+            let headlineBinding = Binding<String>(
+                get: { userProfile.headline },
+                set: { newValue in
+                    var mutableValue = newValue
+                    let validatedValue = Validator.validateStringLength(&mutableValue, maxLength: 60)
+                    userProfile.headline = mutableValue
+                }
+            )
+            TextField("Introduce yourself to the community", text: headlineBinding)
+                .onChange(of: headlineBinding.wrappedValue) { newValue in
+                    var mutableValue = newValue
+                    let validatedValue = Validator.validateStringLength(&mutableValue, maxLength: 60)
+                    headlineBinding.wrappedValue = mutableValue
+                }
+                .onChange(of: userProfile.headline) { newValue in
+                    hasChanges = true
+                    updateSaveButtonState()
+                }
         }
     }
     
     private var locationSection: some View {
         Section(header: Text("Location")) {
             TextField("Find practitioners near you", text: $userProfile.location)
+            .onChange(of: userProfile.location) { newValue in
+                hasChanges = true
+                updateSaveButtonState()
+            }
         }
     }
     
@@ -185,6 +213,10 @@ struct EditProfileView: View {
         Section(header: Text("Link")) {
             TextField("Primary website or social media", text: $userProfile.link)
                 .autocapitalization(.none)
+            .onChange(of: userProfile.link) { newValue in
+                hasChanges = true
+                updateSaveButtonState()
+            }
         }
     }
 
@@ -213,6 +245,8 @@ struct EditProfileView: View {
                     Button("Save") {
                         saveProfile()
                     }
+                    .disabled(userProfile.name.isEmpty)
+                    .disabled(isSaveDisabled)
                 }
             })
             .onAppear {
@@ -237,6 +271,14 @@ struct EditProfileView: View {
                     isLoadingUserPhoto = false
                 }
             }
+        }
+    }
+    
+    private func updateSaveButtonState() {
+        if userProfile.name.isEmpty || !hasChanges {
+            isSaveDisabled = true
+        } else {
+            isSaveDisabled = false
         }
     }
 }

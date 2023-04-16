@@ -26,6 +26,8 @@ struct SettingsView: View {
     @State private var isLoading = false
     @State private var isInitialLoad = true
     @State private var isCredentialImageLoaded = false
+    @State private var hasChanges = false
+    @State private var isSaveDisabled = true
     
     func loadSettings() {
         if isInitialLoad {
@@ -172,6 +174,8 @@ struct SettingsView: View {
                 }
                 .onChange(of: userProfile.birthday) { _ in
                     isBirthdaySet = !Calendar.current.isDateInToday(userProfile.birthday)
+                    hasChanges = true
+                    updateSaveButtonState()
                 }
                 .sheet(isPresented: $showDatePicker) {
                     VStack {
@@ -204,10 +208,15 @@ struct SettingsView: View {
                 .autocapitalization(.none)
                 .onChange(of: userProfile.email) { newValue in
                     userProfile.email = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                    hasChanges = true
+                    updateSaveButtonState()
                 }
+
             TextField("Phone", text: $userProfile.phone)
                 .onChange(of: userProfile.phone) { newValue in
                     userProfile.phone = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                    hasChanges = true
+                    updateSaveButtonState()
                 }
         }
     }
@@ -252,6 +261,8 @@ struct SettingsView: View {
 
             Button(action: {
                 showCredentialImagePicker.toggle()
+                hasChanges = true
+                updateSaveButtonState()
             }) {
                 if credentialImage != nil {
                     Text("Edit Photo")
@@ -282,23 +293,16 @@ struct SettingsView: View {
                 Button("Save") {
                     saveProfile()
                 }
+                .disabled(isSaveDisabled)
             }
         }
     }
-}
-
-class ImageCache {
-    private var cache = NSCache<NSString, UIImage>()
-
-    func set(_ image: UIImage, forKey key: String) {
-        cache.setObject(image, forKey: key as NSString)
+    
+    private func updateSaveButtonState() {
+        if userProfile.name.isEmpty || !hasChanges {
+            isSaveDisabled = true
+        } else {
+            isSaveDisabled = false
+        }
     }
-
-    func get(forKey key: String) -> UIImage? {
-        return cache.object(forKey: key as NSString)
-    }
-}
-
-extension ImageCache {
-    static let shared = ImageCache()
 }

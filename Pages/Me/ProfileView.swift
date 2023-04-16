@@ -36,25 +36,36 @@ struct ProfileView: View {
                                 .font(.title)
                                 .fontWeight(.bold)
                             
-                            Text("👋 " + userProfile.headline)
-                                .font(.callout)
-                                .foregroundColor(.secondary)
-
-                            Text("📍 " + userProfile.location)
-                                .font(.callout)
-                                .foregroundColor(.secondary)
-                            
-                            Button(action: {
-                                if let url = URL(string: userProfile.link) {
-                                    UIApplication.shared.open(url)
-                                }
-                            }) {
-                                Text("🔗 " + TextHelper.cleanURLString(userProfile.link))
+                            if userProfile.headline != "" {
+                                HStack {
+                                    Text("👋 " + userProfile.headline)
                                     .font(.callout)
-                                    .foregroundColor(.accentColor)
+                                    .foregroundColor(.secondary)
+                                    .multilineTextAlignment(.center)
+                                    
+                                }
+                                .padding(.horizontal)
                             }
                             
-                            EditProfileButton(isEditProfilePresented: $isEditProfilePresented, userProfile: userProfile, tempProfileImage: $tempProfileImage, onProfileUpdated: loadProfileImage)
+                            if userProfile.location != "" {
+                                Text("📍 " + userProfile.location)
+                                    .font(.callout)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            if userProfile.link != "" {
+                                Button(action: {
+                                    if let url = URL(string: userProfile.link) {
+                                        UIApplication.shared.open(url)
+                                    }
+                                }) {
+                                    Text("🔗 " + TextHelper.cleanURLString(userProfile.link))
+                                        .font(.callout)
+                                        .foregroundColor(.accentColor)
+                                }
+                            }
+                        
+                            EditProfileButton(isEditProfilePresented: $isEditProfilePresented, userProfile: userProfile, tempProfileImage: $tempProfileImage, isSettingsPresented: $isSettingsPresented, onProfileUpdated: loadProfileImage)
                             
                             SettingsButton(isSettingsPresented: $isSettingsPresented, userProfile: userProfile)
                         }
@@ -75,7 +86,7 @@ struct ProfileView: View {
     private func loadProfileImage() {
         if let userProfile = userProfileData.userProfile, let profileImageURL = userProfile.profileImageURL {
             print("Loading profile image from URL:", profileImageURL)
-            isLoading = true
+            userProfileData.isLoading = true
             FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { uiImage, error in
                 if let error = error {
                     print("Error loading profile image:", error.localizedDescription)
@@ -88,7 +99,7 @@ struct ProfileView: View {
                     print("Profile image not loaded, no error returned")
                 }
                 DispatchQueue.main.async {
-                    isLoading = false
+                    userProfileData.isLoading = false
                 }
             }
         }
@@ -100,6 +111,7 @@ struct ProfileImage: View {
     @ObservedObject var userProfile: UserProfile
     @Binding var profileImage: UIImage?
     @Binding var isEditProfilePresented: Bool
+    @State private var isLoading: Bool = false
     
     var body: some View {
         Group {
@@ -109,6 +121,9 @@ struct ProfileImage: View {
                     .scaledToFill()
                     .frame(width: 150, height: 150)
                     .clipShape(Circle())
+            } else if isLoading {
+                ProgressView()
+                    .frame(width: 150, height: 150)
             } else {
                 Button(action: {
                     isEditProfilePresented.toggle()
@@ -121,6 +136,9 @@ struct ProfileImage: View {
                 }
             }
         }
+        .onReceive(userProfileData.$isLoading) { newIsLoading in
+            isLoading = newIsLoading
+        }
     }
 }
 
@@ -128,11 +146,13 @@ struct EditProfileButton: View {
     @Binding var isEditProfilePresented: Bool
     @ObservedObject var userProfile: UserProfile
     @Binding var tempProfileImage: UIImage?
+    @Binding var isSettingsPresented: Bool
     var onProfileUpdated: (() -> Void)?
     
     var body: some View {
         Button(action: {
             isEditProfilePresented.toggle()
+            isSettingsPresented = false
         }) {
             Text("Edit Profile")
                 .frame(minWidth: 0, maxWidth: .infinity)

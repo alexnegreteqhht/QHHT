@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-class UserProfile: ObservableObject, Identifiable {
+class UserProfile: ObservableObject, Identifiable, Equatable {
     @Published var systemId: String = ""
     @Published var systemName: String = ""
     @Published var systemEmail: String = ""
@@ -20,6 +20,14 @@ class UserProfile: ObservableObject, Identifiable {
     @Published var active: Date = Date()
     @Published var verified: Bool = false
     
+    static func == (lhs: UserProfile, rhs: UserProfile) -> Bool {
+            return lhs.name == rhs.name &&
+                lhs.headline == rhs.headline &&
+                lhs.location == rhs.location &&
+                lhs.link == rhs.link &&
+                lhs.profileImageURL == rhs.profileImageURL
+        }
+    
     init() {
 
     }
@@ -36,6 +44,7 @@ class UserProfile: ObservableObject, Identifiable {
 class UserProfileData: ObservableObject {
     @Published var userProfile: UserProfile?
     @Published var profileImage: UIImage?
+    @Published var isLoading: Bool = false
     
     static func previewData() -> UserProfileData {
         let userProfileData = UserProfileData()
