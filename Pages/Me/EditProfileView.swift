@@ -35,7 +35,6 @@ struct EditProfileView: View {
     var onProfileUpdated: (() -> Void)?
     var onProfileImageUpdated: ((UIImage) -> Bool)?
     
-    // Update user profile
     func updateUserProfile(userRef: DocumentReference) {
         userRef.updateData([
             "profileImageURL": userProfile.profileImageURL ?? "",
@@ -92,7 +91,6 @@ struct EditProfileView: View {
         }
     }
     
-    // Profile Image Section
     private var profileImageSection: some View {
         Section {
             if let profileImage = profileImage {
@@ -188,6 +186,7 @@ struct EditProfileView: View {
                     locationSection
                     linkSection
                 }
+                .adaptsToKeyboard()
                 .ignoresSafeArea(.keyboard)
                 .gesture(DragGesture().onChanged({ _ in
                     UIApplication.shared.endEditing()
