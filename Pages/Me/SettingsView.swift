@@ -24,29 +24,46 @@ struct SettingsView: View {
     @State private var isLoadingCredentialImage: Bool = false
     @State private var isSavingProfile: Bool = false
     @State private var isLoading = false
+    @State private var isInitialLoad = true
+    @State private var isCredentialImageLoaded = false
     
     func loadSettings() {
-        isLoadingCredentialImage = true
-        if let credentialImageURL = userProfile.credentialImageURL {
-            FirebaseHelper.loadImageFromURL(urlString: credentialImageURL) { uiImage, error in
-                if let error = error {
-                    print("Error loading profile image:", error.localizedDescription)
-                } else if let uiImage = uiImage {
-                    print("Profile image loaded successfully")
-                    DispatchQueue.main.async {
-                        credentialImage = uiImage
+        if isInitialLoad {
+            if !isCredentialImageLoaded {
+                isLoadingCredentialImage = true
+                if let credentialImageURL = userProfile.credentialImageURL {
+                    if let cachedImage = ImageCache.shared.get(forKey: credentialImageURL) {
+                        credentialImage = cachedImage
+                        isCredentialImageLoaded = true
+                        isLoadingCredentialImage = false
+                        isLoading = false
+                    } else {
+                        FirebaseHelper.loadImageFromURL(urlString: credentialImageURL) { uiImage, error in
+                            if let error = error {
+                                print("Error loading profile image:", error.localizedDescription)
+                            } else if let uiImage = uiImage {
+                                print("Profile image loaded successfully")
+                                DispatchQueue.main.async {
+                                    credentialImage = uiImage
+                                    ImageCache.shared.set(uiImage, forKey: credentialImageURL)
+                                    isCredentialImageLoaded = true // Set the flag to true after loading the image
+                                }
+                            } else {
+                                print("Profile image not loaded, no error returned")
+                            }
+                            DispatchQueue.main.async {
+                                isLoadingCredentialImage = false // Set isLoadingCredentialImage to false after loading the image
+                                isLoading = false
+                            }
+                        }
                     }
                 } else {
-                    print("Profile image not loaded, no error returned")
-                }
-                DispatchQueue.main.async {
-                    isLoading = false
+                    isLoadingCredentialImage = false
                 }
             }
-        } else {
-            isLoadingCredentialImage = false
+            loadUserBirthday()
+            isInitialLoad = false
         }
-        loadUserBirthday()
     }
     
     func loadUserBirthday() {
@@ -217,16 +234,16 @@ struct SettingsView: View {
                             .foregroundColor(.clear)
                             .frame(width: 150, height: 150)
 
-                        if !isLoadingCredentialImage {
+                        if !isCredentialImageLoaded && isLoadingCredentialImage {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
                             Image(systemName: "doc.badge.plus")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 150, height: 150)
                                 .foregroundColor(.gray)
                                 .frame(maxWidth: .infinity, alignment: .center)
-                        } else {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -239,15 +256,9 @@ struct SettingsView: View {
                 if credentialImage != nil {
                     Text("Edit Photo")
                         .frame(maxWidth: .infinity, alignment: .center)
-                        .sheet(isPresented: $showCredentialImagePicker) {
-                            ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
-                        }
                 } else {
                     Text("Add Photo")
                         .frame(maxWidth: .infinity, alignment: .center)
-                        .sheet(isPresented: $showCredentialImagePicker) {
-                            ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
-                        }
                 }
             }
         }
@@ -274,4 +285,20 @@ struct SettingsView: View {
             }
         }
     }
+}
+
+class ImageCache {
+    private var cache = NSCache<NSString, UIImage>()
+
+    func set(_ image: UIImage, forKey key: String) {
+        cache.setObject(image, forKey: key as NSString)
+    }
+
+    func get(forKey key: String) -> UIImage? {
+        return cache.object(forKey: key as NSString)
+    }
+}
+
+extension ImageCache {
+    static let shared = ImageCache()
 }
