@@ -143,8 +143,7 @@ struct EditProfileButton: View {
         }
         .padding(.horizontal, 20)
         .sheet(isPresented: $isEditProfilePresented) {
-            
-            EditProfileView(userProfile: userProfile, profileImage: tempProfileImage)
+            EditProfileView(userProfile: userProfile, profileImage: $tempProfileImage)
         }
     }
 }

@@ -15,7 +15,7 @@ struct EditProfileView_Previews: PreviewProvider {
 struct EditProfileView: View {
     @ObservedObject var userProfile: UserProfile
     @Environment(\.presentationMode) private var presentationMode
-    @State var profileImage: UIImage? = nil
+    @Binding var profileImage: UIImage?
     @State private var profileImageData: Data? = nil
     @State private var showImagePicker: Bool = false
     @State private var showAlert: Bool = false
