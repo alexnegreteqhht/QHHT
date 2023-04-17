@@ -42,6 +42,7 @@ struct ContentView: View {
                 userProfileData.userProfile = fetchedUserProfile
             }
         }
+        .accentColor(.primary)
         .environmentObject(userProfileData)
     }
 }
