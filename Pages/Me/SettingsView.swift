@@ -184,6 +184,7 @@ struct SettingsView: View {
                 securitySection
                 birthdaySection
                 verificationSection
+                supportButton
                 logOutButton
             }
             .adaptsToKeyboard()
@@ -215,7 +216,13 @@ struct SettingsView: View {
     }
     
     private var verificationSection: some View {
-        Section(header: Text("Verification"), footer: Text("Become a verified practitioner by uploading an image of your certification.")) {
+        Section(header: Text("Verification"), footer: Group {
+            if userProfile.verified {
+                Text("You are a verified practitioner.")
+            } else {
+                Text("Become a verified practitioner by uploading an image of your certification.")
+            }
+        }) {
             if let credentialImage = credentialImage {
                 Button(action: {
                     showImagePicker.toggle()
@@ -264,16 +271,6 @@ struct SettingsView: View {
                     Text("Add Credential")
                         .frame(maxWidth: .infinity, alignment: .center)
                 }
-            }
-            
-            if userProfile.verified == true {
-                Text("Status: Verified")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .foregroundColor(.gray)
-            } else {
-                Text("Status: Not Verified")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .foregroundColor(.gray)
             }
         }
         .sheet(isPresented: $showImagePicker) {
@@ -376,6 +373,17 @@ struct SettingsView: View {
                 .disabled(isSaveDisabled)
             }
         }
+    }
+    
+    private var supportButton: some View {
+        Button(action: {
+            if let url = URL(string: "mailto:me@alexnegrete.com") {
+                UIApplication.shared.open(url)
+            }
+        }, label: {
+            Text("Support / Feedback")
+                .foregroundColor(.blue)
+        })
     }
     
     private var logOutButton: some View {
