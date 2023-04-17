@@ -331,7 +331,7 @@ struct EditProfileView: View {
     }
     
     private func updateSaveButtonState() {
-        if userProfile.name.isEmpty || localName == userProfile.name && localHeadline == userProfile.headline && localLocation == userProfile.location && localProfileImageURL == userProfile.profileImageURL && !hasChanges {
+        if localName.isEmpty || localName == userProfile.name && localHeadline == userProfile.headline && localLocation == userProfile.location && localProfileImageURL == userProfile.profileImageURL && !hasChanges {
             isSaveDisabled = true
             
             print(localName == userProfile.name,
@@ -373,7 +373,7 @@ struct EditProfileView: View {
                     Text("Save")
                         .foregroundColor(isSaveDisabled ? .gray : .blue)
                 }
-                .disabled(userProfile.name.isEmpty)
+                .disabled(localName.isEmpty)
                 .disabled(isSaveDisabled)
             }
         }

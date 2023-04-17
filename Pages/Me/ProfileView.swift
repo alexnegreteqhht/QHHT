@@ -32,7 +32,7 @@ struct ProfileView: View {
                             ProfileImage(userProfile: userProfile, profileImage: $profileImage, isEditProfilePresented: $isEditProfilePresented)
                                 .frame(width: profileImageSize, height: profileImageSize)
                             
-                            Text(userProfile.name)
+                            Text(userProfile.name + (userProfile.verified ? " ☑️" : ""))
                                 .font(.title)
                                 .fontWeight(.bold)
                             

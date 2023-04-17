@@ -176,8 +176,8 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                birthdaySection
                 securitySection
+                birthdaySection
                 verificationSection
                 logOutButton
             }
@@ -253,12 +253,22 @@ struct SettingsView: View {
                 updateSaveButtonState()
             }) {
                 if credentialImage != nil {
-                    Text("Edit Credential")
+                    Text("Update Credential")
                         .frame(maxWidth: .infinity, alignment: .center)
                 } else {
                     Text("Add Credential")
                         .frame(maxWidth: .infinity, alignment: .center)
                 }
+            }
+            
+            if userProfile.verified == true {
+                Text("Status: Verified ✅")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .foregroundColor(.green)
+            } else {
+                Text("Status: Not Verified")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .foregroundColor(.gray)
             }
         }
         .sheet(isPresented: $showImagePicker) {
@@ -267,7 +277,7 @@ struct SettingsView: View {
     }
 
     private var birthdaySection: some View {
-        Section(header: Text("Birthday"), footer: Text("We use this to improve your experience and give you discounts.")) {
+        Section(header: Text("Birthday")) {
             if isBirthdaySet {
                 Text("\(localBirthday, formatter: GlobalDefaults.dateFormatter)")
                     .foregroundColor(Color(.placeholderText))
@@ -311,7 +321,7 @@ struct SettingsView: View {
     }
 
     private var securitySection: some View {
-        Section(header: Text("Security"), footer: Text("We use this to secure your account and send you important updates.")) {
+        Section(header: Text("Security")) {
             TextField("Email", text: $localEmail)
                 .autocapitalization(.none)
                 .onChange(of: localEmail) { newValue in
