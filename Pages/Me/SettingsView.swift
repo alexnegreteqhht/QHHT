@@ -15,6 +15,7 @@ struct SettingsView_Previews: PreviewProvider {
 struct SettingsView: View {
     @ObservedObject var userProfile: UserProfile
     @Environment(\.presentationMode) private var presentationMode
+    var onSettingsUpdated: (() -> Void)?
     @State private var showAlert: Bool = false
     @State private var errorMessage: String = ""
     @State private var showDatePicker = false
@@ -34,7 +35,7 @@ struct SettingsView: View {
     @State private var localBirthday: Date = Date()
     @State private var localCredentialImage: UIImage?
     @State private var localCredentialImageURL: String?
-    var onSettingsUpdated: (() -> Void)?
+    @State private var isBirthdayLoading = true
     
     func loadSettings() {
         if isInitialLoad {
@@ -70,12 +71,12 @@ struct SettingsView: View {
                     isLoadingCredentialImage = false
                 }
             }
-            loadUserBirthday()
+            loadBirthday()
             isInitialLoad = false
         }
     }
     
-    func loadUserBirthday() {
+    func loadBirthday() {
         if let user = Auth.auth().currentUser {
             let db = Firestore.firestore()
             let userRef = db.collection("users").document(user.uid)
@@ -96,9 +97,13 @@ struct SettingsView: View {
                 } else {
                     print("Error fetching user's birthday: \(error?.localizedDescription ?? "Unknown error")")
                 }
+                DispatchQueue.main.async {
+                    isBirthdayLoading = false
+                }
             }
         }
     }
+
     
     func updateUserSettings(userRef: DocumentReference) {
         userRef.updateData([
@@ -262,9 +267,9 @@ struct SettingsView: View {
             }
             
             if userProfile.verified == true {
-                Text("Status: Verified ✅")
+                Text("Status: Verified")
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .foregroundColor(.green)
+                    .foregroundColor(.gray)
             } else {
                 Text("Status: Not Verified")
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -275,17 +280,20 @@ struct SettingsView: View {
             ImagePicker(selectedImage: $localCredentialImage, imageData: $credentialImageData)
         }
     }
-
+    
     private var birthdaySection: some View {
         Section(header: Text("Birthday")) {
-            if isBirthdaySet {
+            if isBirthdayLoading {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle())
+            } else if isBirthdaySet {
                 Text("\(localBirthday, formatter: GlobalDefaults.dateFormatter)")
                     .foregroundColor(Color(.placeholderText))
             } else {
                 Button(action: {
                     showDatePicker.toggle()
                 }) {
-                    Text("Add Birthday")
+                    Text("Set Birthday")
                 }
                 .onChange(of: localBirthday) { newDate in
                     if newDate != localBirthday {
