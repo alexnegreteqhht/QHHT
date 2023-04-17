@@ -5,7 +5,7 @@ import Combine
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileView(userProfile: UserProfile(name: "", headline: "", location: "Anytown, USA", link: "https://www.apple.com", profileImageURL: ""))
+        ProfileView(userProfile: UserProfile(name: "", headline: "", location: "", link: "", profileImageURL: ""))
             .environmentObject(UserProfileData.previewData())
     }
 }

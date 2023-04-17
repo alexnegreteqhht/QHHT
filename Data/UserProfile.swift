@@ -48,7 +48,7 @@ class UserProfileData: ObservableObject {
     
     static func previewData() -> UserProfileData {
         let userProfileData = UserProfileData()
-        userProfileData.userProfile = UserProfile(name: "John Doe", headline: "SwiftUI enthusiast", location: "Anytown, USA", link: "https://www.apple.com", profileImageURL: "")
+        userProfileData.userProfile = UserProfile(name: "Delores Cannon", headline: "QHHT Hypnotherapist", location: "Huntsville, AR", link: "https://www.qhhtofficial.com", profileImageURL: "https://s.lubimyczytac.pl/upload/authors/44592/330283-352x500.jpg")
         return userProfileData
     }
 }
