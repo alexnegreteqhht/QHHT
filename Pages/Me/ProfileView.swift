@@ -65,7 +65,7 @@ struct ProfileView: View {
                                 }
                             }
                         
-                            EditProfileButton(isEditProfilePresented: $isEditProfilePresented, userProfile: userProfile, tempProfileImage: $tempProfileImage, isSettingsPresented: $isSettingsPresented, onProfileUpdated: loadProfileImage)
+                            EditProfileButton(isEditProfilePresented: $isEditProfilePresented, userProfile: userProfile, tempProfileImage: $tempProfileImage, isSettingsPresented: $isSettingsPresented, profileImage: $profileImage, onProfileUpdated: loadProfileImage)
                             
                             SettingsButton(isSettingsPresented: $isSettingsPresented, userProfile: userProfile)
                         }
@@ -144,10 +144,11 @@ struct ProfileImage: View {
 
 struct EditProfileButton: View {
     @Binding var isEditProfilePresented: Bool
-    @ObservedObject var userProfile: UserProfile
-    @Binding var tempProfileImage: UIImage?
-    @Binding var isSettingsPresented: Bool
-    var onProfileUpdated: (() -> Void)?
+        @ObservedObject var userProfile: UserProfile
+        @Binding var tempProfileImage: UIImage?
+        @Binding var isSettingsPresented: Bool
+        @Binding var profileImage: UIImage?
+        var onProfileUpdated: (() -> Void)?
     
     var body: some View {
         Button(action: {
@@ -163,7 +164,21 @@ struct EditProfileButton: View {
         }
         .padding(.horizontal, 20)
         .sheet(isPresented: $isEditProfilePresented) {
-            EditProfileView(userProfile: userProfile, profileImage: $tempProfileImage)
+            EditProfileView(
+                userProfile: userProfile,
+                profileImage: $profileImage,
+                localName: userProfile.name,
+                localHeadline: userProfile.headline,
+                localLocation: userProfile.location,
+                localLink: userProfile.link,
+                onProfileUpdated: {
+                    // Handle profile updated here, if needed
+                },
+                onProfileImageUpdated: { updatedProfileImage in
+                    profileImage = updatedProfileImage
+                    return true
+                }
+            )
         }
     }
 }

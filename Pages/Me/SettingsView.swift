@@ -7,7 +7,8 @@ import FirebaseFirestore
 
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileView(userProfile: UserProfile(name: "", headline: "", location: "", link: "", profileImageURL: ""))
+        SettingsView(userProfile: UserProfile())
+        .environmentObject(UserProfileData.previewData())
     }
 }
 
@@ -20,7 +21,7 @@ struct SettingsView: View {
     @State private var isBirthdaySet = false
     @State private var credentialImage: UIImage?
     @State private var credentialImageData: Data?
-    @State private var showCredentialImagePicker = false
+    @State private var showImagePicker = false
     @State private var isLoadingCredentialImage: Bool = false
     @State private var isSavingProfile: Bool = false
     @State private var isLoading = false
@@ -28,6 +29,12 @@ struct SettingsView: View {
     @State private var isCredentialImageLoaded = false
     @State private var hasChanges = false
     @State private var isSaveDisabled = true
+    @State private var localEmail: String = ""
+    @State private var localPhone: String = ""
+    @State private var localBirthday: Date = Date()
+    @State private var localCredentialImage: UIImage?
+    @State private var localCredentialImageURL: String?
+    var onSettingsUpdated: (() -> Void)?
     
     func loadSettings() {
         if isInitialLoad {
@@ -42,19 +49,19 @@ struct SettingsView: View {
                     } else {
                         FirebaseHelper.loadImageFromURL(urlString: credentialImageURL) { uiImage, error in
                             if let error = error {
-                                print("Error loading profile image:", error.localizedDescription)
+                                print("Error loading credential image:", error.localizedDescription)
                             } else if let uiImage = uiImage {
-                                print("Profile image loaded successfully")
+                                print("Credential image loaded successfully")
                                 DispatchQueue.main.async {
                                     credentialImage = uiImage
                                     ImageCache.shared.set(uiImage, forKey: credentialImageURL)
-                                    isCredentialImageLoaded = true // Set the flag to true after loading the image
+                                    isCredentialImageLoaded = true
                                 }
                             } else {
-                                print("Profile image not loaded, no error returned")
+                                print("Credential image not loaded, no error returned")
                             }
                             DispatchQueue.main.async {
-                                isLoadingCredentialImage = false // Set isLoadingCredentialImage to false after loading the image
+                                isLoadingCredentialImage = false
                                 isLoading = false
                             }
                         }
@@ -78,7 +85,10 @@ struct SettingsView: View {
                     if let birthday = document.data()?["birthday"] as? Timestamp {
                         DispatchQueue.main.async {
                             userProfile.birthday = birthday.dateValue()
+                            localBirthday = birthday.dateValue()
                             isBirthdaySet = !Calendar.current.isDateInToday(userProfile.birthday)
+                            hasChanges = false
+                            updateSaveButtonState()
                         }
                     } else {
                         isBirthdaySet = false
@@ -92,22 +102,53 @@ struct SettingsView: View {
     
     func updateUserSettings(userRef: DocumentReference) {
         userRef.updateData([
+            "credentialImageURL": userProfile.credentialImageURL ?? "",
             "email": userProfile.email,
             "phone": userProfile.phone,
-            "birthday": userProfile.birthday,
-            "credentialImageURL": userProfile.credentialImageURL ?? ""
+            "birthday": userProfile.birthday
         ]) { error in
             if let error = error {
-                errorMessage = "Error updating account: \(error.localizedDescription)"
+                errorMessage = "Error updating settings: \(error.localizedDescription)"
                 showAlert.toggle()
             } else {
-                presentationMode.wrappedValue.dismiss()
+                if let credentialImageURL = userProfile.credentialImageURL {
+                    FirebaseHelper.loadImageFromURL(urlString: credentialImageURL) { uiImage, error in
+                        if let error = error {
+                            print("Error loading credential image:", error.localizedDescription)
+                        } else if let uiImage = uiImage {
+                            print("Credential image loaded successfully")
+                            DispatchQueue.main.async {
+                                credentialImage = uiImage
+                            }
+                        } else {
+                            print("Credential image not loaded, no error returned")
+                        }
+                        DispatchQueue.main.async {
+                            isLoading = false
+                        }
+                    }
+                }
+                if let profileImageURL = userProfile.profileImageURL {
+                    userProfile.profileImageURL = profileImageURL
+                }
+                DispatchQueue.main.async {
+                    onSettingsUpdated?()
+                    self.presentationMode.wrappedValue.dismiss()
+                    isSavingProfile = false
+                }
             }
         }
     }
 
     func saveProfile() {
         isSavingProfile = true
+        
+        userProfile.email = localEmail
+        userProfile.phone = localPhone
+        userProfile.birthday = localBirthday
+        userProfile.credentialImageURL = localCredentialImageURL
+        credentialImage = localCredentialImage
+        
         if let user = Auth.auth().currentUser {
             let userRef = Firestore.firestore().collection("users").document(user.uid)
             let dispatchGroup = DispatchGroup()
@@ -133,18 +174,14 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 birthdaySection
                 securitySection
                 verificationSection
-                Button(action: {
-                    try? Auth.auth().signOut()
-                }, label: {
-                    Text("Log Out")
-                        .foregroundColor(.red)
-                })
+                logOutButton
             }
+            .adaptsToKeyboard()
             .ignoresSafeArea(.keyboard)
             .gesture(DragGesture().onChanged({ _ in
                 UIApplication.shared.endEditing()
@@ -157,67 +194,18 @@ struct SettingsView: View {
             .alert(isPresented: $showAlert) {
                 Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
             }
-            .onAppear(perform: loadSettings)
-        }
-    }
-
-    private var birthdaySection: some View {
-        Section(header: Text("Birthday"), footer: Text("We use this to improve your experience and give you discounts.")) {
-            if isBirthdaySet {
-                Text("\(userProfile.birthday, formatter: GlobalDefaults.dateFormatter)")
-                    .foregroundColor(Color(.placeholderText))
-            } else {
-                Button(action: {
-                    showDatePicker.toggle()
-                }) {
-                    Text("Add Birthday")
-                }
-                .onChange(of: userProfile.birthday) { _ in
-                    isBirthdaySet = !Calendar.current.isDateInToday(userProfile.birthday)
-                    hasChanges = true
+            .onAppear {
+                DispatchQueue.main.async {
+                    localEmail = userProfile.email
+                    localPhone = userProfile.phone
+                    localBirthday = userProfile.birthday
+                    localCredentialImage = credentialImage
+                    localCredentialImageURL = userProfile.credentialImageURL
+                    loadSettings()
+                    hasChanges = false
                     updateSaveButtonState()
-                }
-                .sheet(isPresented: $showDatePicker) {
-                    VStack {
-                        Text("Select Your Birthday")
-                            .font(.headline)
-                        DatePicker("", selection: $userProfile.birthday, displayedComponents: .date)
-                            .datePickerStyle(WheelDatePickerStyle())
-                            .labelsHidden()
-                        Button(action: {
-                            isBirthdaySet = true
-                            showDatePicker = false
-                        }) {
-                            Text("Done")
-                                .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                        }
-                        .padding(.top)
-                    }
-                    .padding()
                 }
             }
-        }
-    }
-
-    private var securitySection: some View {
-        Section(header: Text("Security"), footer: Text("We use this to secure your account and send you important updates.")) {
-            TextField("Email", text: $userProfile.email)
-                .autocapitalization(.none)
-                .onChange(of: userProfile.email) { newValue in
-                    userProfile.email = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                    hasChanges = true
-                    updateSaveButtonState()
-                }
-
-            TextField("Phone", text: $userProfile.phone)
-                .onChange(of: userProfile.phone) { newValue in
-                    userProfile.phone = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                    hasChanges = true
-                    updateSaveButtonState()
-                }
         }
     }
     
@@ -225,9 +213,9 @@ struct SettingsView: View {
         Section(header: Text("Verification"), footer: Text("Become a verified practitioner by uploading an image of your certification.")) {
             if let credentialImage = credentialImage {
                 Button(action: {
-                    showCredentialImagePicker.toggle()
+                    showImagePicker.toggle()
                 }) {
-                    Image(uiImage: credentialImage)
+                    Image(uiImage: localCredentialImage ?? credentialImage)
                         .resizable()
                         .scaledToFill()
                         .frame(width: 150, height: 150)
@@ -236,7 +224,7 @@ struct SettingsView: View {
                 }
             } else {
                 Button(action: {
-                    showCredentialImagePicker.toggle()
+                    showImagePicker.toggle()
                 }) {
                     ZStack {
                         RoundedRectangle(cornerRadius: 75)
@@ -260,21 +248,92 @@ struct SettingsView: View {
             }
 
             Button(action: {
-                showCredentialImagePicker.toggle()
+                showImagePicker.toggle()
                 hasChanges = true
                 updateSaveButtonState()
             }) {
                 if credentialImage != nil {
-                    Text("Edit Photo")
+                    Text("Edit Credential")
                         .frame(maxWidth: .infinity, alignment: .center)
                 } else {
-                    Text("Add Photo")
+                    Text("Add Credential")
                         .frame(maxWidth: .infinity, alignment: .center)
                 }
             }
         }
-        .sheet(isPresented: $showCredentialImagePicker) {
-            ImagePicker(selectedImage: $credentialImage, imageData: $credentialImageData)
+        .sheet(isPresented: $showImagePicker) {
+            ImagePicker(selectedImage: $localCredentialImage, imageData: $credentialImageData)
+        }
+    }
+
+    private var birthdaySection: some View {
+        Section(header: Text("Birthday"), footer: Text("We use this to improve your experience and give you discounts.")) {
+            if isBirthdaySet {
+                Text("\(localBirthday, formatter: GlobalDefaults.dateFormatter)")
+                    .foregroundColor(Color(.placeholderText))
+            } else {
+                Button(action: {
+                    showDatePicker.toggle()
+                }) {
+                    Text("Add Birthday")
+                }
+                .onChange(of: localBirthday) { newDate in
+                    if newDate != localBirthday {
+                        localBirthday = newDate
+                        isBirthdaySet = !Calendar.current.isDateInToday(localBirthday)
+                        hasChanges = true
+                        updateSaveButtonState()
+                    }
+                }
+                .sheet(isPresented: $showDatePicker) {
+                    VStack {
+                        Text("Select Your Birthday")
+                            .font(.headline)
+                        DatePicker("", selection: $localBirthday, displayedComponents: .date)
+                            .datePickerStyle(WheelDatePickerStyle())
+                            .labelsHidden()
+                        Button(action: {
+                            isBirthdaySet = true
+                            showDatePicker = false
+                        }) {
+                            Text("Done")
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                        .padding(.top)
+                    }
+                    .padding()
+                }
+            }
+        }
+    }
+
+    private var securitySection: some View {
+        Section(header: Text("Security"), footer: Text("We use this to secure your account and send you important updates.")) {
+            TextField("Email", text: $localEmail)
+                .autocapitalization(.none)
+                .onChange(of: localEmail) { newValue in
+                    localEmail = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                    hasChanges = true
+                    updateSaveButtonState()
+                }
+
+            TextField("Phone", text: $localPhone)
+                .onChange(of: localPhone) { newValue in
+                    localPhone = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                    hasChanges = true
+                    updateSaveButtonState()
+                }
+        }
+    }
+    
+    private func updateSaveButtonState() {
+        if localEmail == userProfile.email && localPhone == userProfile.phone && localBirthday == userProfile.birthday && localCredentialImageURL == userProfile.credentialImageURL && !hasChanges {
+            isSaveDisabled = true
+        } else {
+            isSaveDisabled = false
         }
     }
 
@@ -290,19 +349,23 @@ struct SettingsView: View {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .gray))
             } else {
-                Button("Save") {
+                Button(action: {
                     saveProfile()
+                }) {
+                    Text("Save")
+                        .foregroundColor(isSaveDisabled ? .gray : .blue)
                 }
                 .disabled(isSaveDisabled)
             }
         }
     }
     
-    private func updateSaveButtonState() {
-        if userProfile.name.isEmpty || !hasChanges {
-            isSaveDisabled = true
-        } else {
-            isSaveDisabled = false
-        }
+    private var logOutButton: some View {
+        Button(action: {
+            try? Auth.auth().signOut()
+        }, label: {
+            Text("Log Out")
+                .foregroundColor(.red)
+        })
     }
 }

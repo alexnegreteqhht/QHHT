@@ -8,8 +8,15 @@ import FirebaseFirestore
 
 struct EditProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileView(userProfile: UserProfile(name: "", headline: "", location: "", link: "", profileImageURL: ""))
-            .environmentObject(UserProfileData.previewData())
+        EditProfileView(
+            userProfile: UserProfile(name: "", headline: "", location: "", link: "", profileImageURL: ""),
+            profileImage: .constant(nil),
+            localName: "",
+            localHeadline: "",
+            localLocation: "",
+            localLink: ""
+        )
+        .environmentObject(UserProfileData.previewData())
     }
 }
 
@@ -21,13 +28,9 @@ struct EditProfileView: View {
     @State private var showImagePicker: Bool = false
     @State private var showAlert: Bool = false
     @State private var errorMessage: String = ""
-    @State private var credentialImage: UIImage?
-    @State private var credentialImageData: Data?
-    @State private var showCredentialImagePicker = false
-    @State private var isLoadingCredentialImage: Bool = false
     @State private var showDatePicker = false
     @State private var isBirthdaySet = false
-    @State private var isLoadingUserPhoto: Bool = false
+    @State private var isLoadingProfileImage: Bool = false
     @State private var userName: String = ""
     @State private var userBio: String = ""
     @State private var userLocation: String = ""
@@ -38,6 +41,70 @@ struct EditProfileView: View {
     @State private var isLoading = false
     @State private var hasChanges = false
     @State private var isSaveDisabled = true
+    @State private var localName: String
+    @State private var localHeadline: String
+    @State private var localLocation: String
+    @State private var localLink: String
+    @State private var localProfileImage: UIImage?
+    @State private var localProfileImageURL: String?
+    @State private var isProfileImageLoaded = false
+    @State private var isInitialLoad = true
+    
+    init(userProfile: UserProfile,
+         profileImage: Binding<UIImage?>,
+         localName: String,
+         localHeadline: String,
+         localLocation: String,
+         localLink: String,
+         onProfileUpdated: (() -> Void)? = nil,
+         onProfileImageUpdated: ((UIImage) -> Bool)? = nil) {
+        self._userProfile = ObservedObject(wrappedValue: userProfile)
+        self._profileImage = profileImage
+        self._localName = State(initialValue: localName)
+        self._localHeadline = State(initialValue: localHeadline)
+        self._localLocation = State(initialValue: localLocation)
+        self._localLink = State(initialValue: localLink)
+        self.onProfileUpdated = onProfileUpdated
+        self.onProfileImageUpdated = onProfileImageUpdated
+    }
+    
+    func loadSettings() {
+        if isInitialLoad {
+            if !isProfileImageLoaded {
+                isLoadingProfileImage = true
+                if let profileImageURL = userProfile.profileImageURL {
+                    if let cachedImage = ImageCache.shared.get(forKey: profileImageURL) {
+                        profileImage = cachedImage
+                        isProfileImageLoaded = true
+                        isLoadingProfileImage = false
+                        isLoading = false
+                    } else {
+                        FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { uiImage, error in
+                            if let error = error {
+                                print("Error loading profile image:", error.localizedDescription)
+                            } else if let uiImage = uiImage {
+                                print("Profile image loaded successfully")
+                                DispatchQueue.main.async {
+                                    profileImage = uiImage
+                                    ImageCache.shared.set(uiImage, forKey: profileImageURL)
+                                    isProfileImageLoaded = true
+                                }
+                            } else {
+                                print("Profile image not loaded, no error returned")
+                            }
+                            DispatchQueue.main.async {
+                                isLoadingProfileImage = false
+                                isLoading = false
+                            }
+                        }
+                    }
+                } else {
+                    isLoadingProfileImage = false
+                }
+            }
+            isInitialLoad = false
+        }
+    }
     
     func updateUserProfile(userRef: DocumentReference) {
         userRef.updateData([
@@ -82,6 +149,14 @@ struct EditProfileView: View {
     
     func saveProfile() {
         isSavingProfile = true
+        
+        userProfile.name = localName
+        userProfile.headline = localHeadline
+        userProfile.location = localLocation
+        userProfile.link = localLink
+        userProfile.profileImageURL = localProfileImageURL
+        profileImage = localProfileImage
+        
         if let user = Auth.auth().currentUser {
             let userRef = Firestore.firestore().collection("users").document(user.uid)
             let dispatchGroup = DispatchGroup()
@@ -101,6 +176,45 @@ struct EditProfileView: View {
             }
             dispatchGroup.notify(queue: .main) {
                 updateUserProfile(userRef: userRef)
+                _ = onProfileImageUpdated?(localProfileImage ?? UIImage())
+            }
+        }
+    }
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                profileImageSection
+                nameSection
+                headlineSection
+                locationSection
+                linkSection
+            }
+            .adaptsToKeyboard()
+            .ignoresSafeArea(.keyboard)
+            .gesture(DragGesture().onChanged({ _ in
+                UIApplication.shared.endEditing()
+            }))
+            .navigationBarTitle("Edit Profile", displayMode: .inline)
+            .navigationBarItems(
+                leading: cancelButton,
+                trailing: saveButton
+            )
+            .alert(isPresented: $showAlert) {
+                Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
+            }
+            .onAppear {
+                DispatchQueue.main.async {
+                    localName = userProfile.name
+                    localHeadline = userProfile.headline
+                    localLocation = userProfile.location
+                    localLink = userProfile.link
+                    localProfileImage = profileImage
+                    localProfileImageURL = userProfile.profileImageURL
+                    loadSettings()
+                    hasChanges = false
+                    updateSaveButtonState()
+                }
             }
         }
     }
@@ -111,12 +225,12 @@ struct EditProfileView: View {
                 Button(action: {
                     showImagePicker.toggle()
                 }) {
-                    Image(uiImage: profileImage)
+                    Image(uiImage: localProfileImage ?? profileImage)
                         .resizable()
                         .scaledToFill()
                         .frame(width: 150, height: 150)
-                        .clipShape(Circle())
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .clipShape(Circle())
                 }
             } else {
                 Button(action: {
@@ -127,16 +241,16 @@ struct EditProfileView: View {
                             .foregroundColor(.clear)
                             .frame(width: 150, height: 150)
 
-                        if !isLoadingUserPhoto {
+                        if !isProfileImageLoaded && isLoadingProfileImage {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
                             Image(systemName: "person.crop.circle.fill.badge.plus")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 150, height: 150)
                                 .foregroundColor(.gray)
                                 .frame(maxWidth: .infinity, alignment: .center)
-                        } else {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -145,31 +259,27 @@ struct EditProfileView: View {
 
             Button(action: {
                 showImagePicker.toggle()
+                hasChanges = true
+                updateSaveButtonState()
             }) {
                 if profileImage != nil {
                     Text("Edit Photo")
                         .frame(maxWidth: .infinity, alignment: .center)
-                        .sheet(isPresented: $showImagePicker) {
-                            ImagePicker(selectedImage: $profileImage, imageData: $profileImageData)
-                        }
                 } else {
                     Text("Add Photo")
                         .frame(maxWidth: .infinity, alignment: .center)
-                        .sheet(isPresented: $showImagePicker) {
-                            ImagePicker(selectedImage: $profileImage, imageData: $profileImageData)
-                        }
                 }
             }
         }
         .sheet(isPresented: $showImagePicker) {
-            ImagePicker(selectedImage: $profileImage, imageData: $profileImageData)
+            ImagePicker(selectedImage: $localProfileImage, imageData: $profileImageData)
         }
     }
     
     private var nameSection: some View {
         Section(header: Text("Name")) {
-            TextField("Your identity on the platform", text: $userProfile.name)
-            .onChange(of: userProfile.name) { newValue in
+            TextField("Your identity on the platform", text: $localName)
+            .onChange(of: localName) { newValue in
                 hasChanges = true
                 updateSaveButtonState()
             }
@@ -179,20 +289,20 @@ struct EditProfileView: View {
     private var headlineSection: some View {
         Section(header: Text("Headline")) {
             let headlineBinding = Binding<String>(
-                get: { userProfile.headline },
+                get: { localHeadline },
                 set: { newValue in
                     var mutableValue = newValue
-                    let validatedValue = Validator.validateStringLength(&mutableValue, maxLength: 60)
-                    userProfile.headline = mutableValue
+                    _ = Validator.validateStringLength(&mutableValue, maxLength: 60)
+                    localHeadline = mutableValue
                 }
             )
             TextField("Introduce yourself to the community", text: headlineBinding)
                 .onChange(of: headlineBinding.wrappedValue) { newValue in
                     var mutableValue = newValue
-                    let validatedValue = Validator.validateStringLength(&mutableValue, maxLength: 60)
+                    _ = Validator.validateStringLength(&mutableValue, maxLength: 60)
                     headlineBinding.wrappedValue = mutableValue
                 }
-                .onChange(of: userProfile.headline) { newValue in
+                .onChange(of: localHeadline) { newValue in
                     hasChanges = true
                     updateSaveButtonState()
                 }
@@ -201,8 +311,8 @@ struct EditProfileView: View {
     
     private var locationSection: some View {
         Section(header: Text("Location")) {
-            TextField("Find practitioners near you", text: $userProfile.location)
-            .onChange(of: userProfile.location) { newValue in
+            TextField("Find practitioners near you", text: $localLocation)
+            .onChange(of: localLocation) { newValue in
                 hasChanges = true
                 updateSaveButtonState()
             }
@@ -211,74 +321,61 @@ struct EditProfileView: View {
     
     private var linkSection: some View {
         Section(header: Text("Link")) {
-            TextField("Primary website or social media", text: $userProfile.link)
+            TextField("Primary website or social media", text: $localLink)
                 .autocapitalization(.none)
-            .onChange(of: userProfile.link) { newValue in
+            .onChange(of: localLink) { newValue in
                 hasChanges = true
                 updateSaveButtonState()
             }
         }
     }
-
-    var body: some View {
-            NavigationStack {
-                Form {
-                    profileImageSection
-                    nameSection
-                    headlineSection
-                    locationSection
-                    linkSection
-                }
-                .adaptsToKeyboard()
-                .ignoresSafeArea(.keyboard)
-                .gesture(DragGesture().onChanged({ _ in
-                    UIApplication.shared.endEditing()
-                }))
-                .navigationBarItems(leading: Button("Cancel") {
-                    presentationMode.wrappedValue.dismiss()
-                }, trailing:
-                Group {
-                if isSavingProfile {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .gray))
-                } else {
-                    Button("Save") {
-                        saveProfile()
-                    }
-                    .disabled(userProfile.name.isEmpty)
-                    .disabled(isSaveDisabled)
-                }
-            })
-            .onAppear {
-                isLoadingUserPhoto = true
-                if let profileImageURL = userProfile.profileImageURL {
-                    FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { uiImage, error in
-                        if let error = error {
-                            print("Error loading profile image:", error.localizedDescription)
-                        } else if let uiImage = uiImage {
-                            print("Profile image loaded successfully")
-                            DispatchQueue.main.async {
-                                profileImage = uiImage
-                            }
-                        } else {
-                            print("Profile image not loaded, no error returned")
-                        }
-                        DispatchQueue.main.async {
-                            isLoading = false
-                        }
-                    }
-                } else {
-                    isLoadingUserPhoto = false
-                }
-            }
+    
+    private func updateSaveButtonState() {
+        if userProfile.name.isEmpty || localName == userProfile.name && localHeadline == userProfile.headline && localLocation == userProfile.location && localProfileImageURL == userProfile.profileImageURL && !hasChanges {
+            isSaveDisabled = true
+            
+            print(localName == userProfile.name,
+                  localHeadline == userProfile.headline,
+                  localLocation == userProfile.location,
+                  localLink == userProfile.link,
+                  localProfileImage == profileImage,
+                  localProfileImageURL == userProfile.profileImageURL, hasChanges)
+            
+        } else {
+            isSaveDisabled = false
+            
+            print(localName == userProfile.name,
+                  localHeadline == userProfile.headline,
+                  localLocation == userProfile.location,
+                  localLink == userProfile.link,
+                  localProfileImage == profileImage,
+                  localProfileImageURL == userProfile.profileImageURL, hasChanges)
+            
+            
         }
     }
     
-    private func updateSaveButtonState() {
-        if userProfile.name.isEmpty || !hasChanges {
-            isSaveDisabled = true
-        } else {
-            isSaveDisabled = false
+    var cancelButton: some View {
+        Button("Cancel") {
+            presentationMode.wrappedValue.dismiss()
+        }
+    }
+
+    var saveButton: some View {
+        Group {
+            if isSavingProfile {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+            } else {
+                Button(action: {
+                    saveProfile()
+                }) {
+                    Text("Save")
+                        .foregroundColor(isSaveDisabled ? .gray : .blue)
+                }
+                .disabled(userProfile.name.isEmpty)
+                .disabled(isSaveDisabled)
+            }
         }
     }
 }
