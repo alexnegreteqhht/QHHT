@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5D024A9B29EE438A00D866CB /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D024A9A29EE438A00D866CB /* Location.swift */; };
 		5D0FD04029E7E3D00038A72B /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0FD03F29E7E3D00038A72B /* UserProfile.swift */; };
 		5D0FD04229E7E4010038A72B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0FD04129E7E4010038A72B /* AppDelegate.swift */; };
 		5D0FD04429E7E42C0038A72B /* AppData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0FD04329E7E42C0038A72B /* AppData.swift */; };
@@ -60,6 +61,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5D024A9A29EE438A00D866CB /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		5D0FD03F29E7E3D00038A72B /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		5D0FD04129E7E4010038A72B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5D0FD04329E7E42C0038A72B /* AppData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppData.swift; sourceTree = "<group>"; };
@@ -135,6 +137,7 @@
 				5D3578EF29EA835F00E182F4 /* GlobalDefaults.swift */,
 				5D3578F129EA9CCF00E182F4 /* Security.swift */,
 				5D3578F829EB88E600E182F4 /* Text.swift */,
+				5D024A9A29EE438A00D866CB /* Location.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -344,6 +347,7 @@
 			files = (
 				5D9F09EE29E51E4100B6C666 /* EditProfileView.swift in Sources */,
 				5D93134629DE9E8E001B5E6E /* Archive.swift in Sources */,
+				5D024A9B29EE438A00D866CB /* Location.swift in Sources */,
 				5DDDD80E29CE941000572BE0 /* ForumView.swift in Sources */,
 				5D0FD04629E7E4480038A72B /* AuthStateDelegate.swift in Sources */,
 				5DDDD80C29CE93D800572BE0 /* DirectoryView.swift in Sources */,
@@ -492,7 +496,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "QHHT-BQH";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to automatically set your profile location when you choose to update it, helping you connect with users nearby.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to automatically set your profile location.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library to let you choose a profile picture.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -537,7 +541,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "QHHT-BQH";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to automatically set your profile location when you choose to update it, helping you connect with users nearby.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to automatically set your profile location.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library to let you choose a profile picture.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;

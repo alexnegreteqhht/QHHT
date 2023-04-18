@@ -171,6 +171,7 @@ struct EditProfileButton: View {
                 localHeadline: userProfile.headline,
                 localLocation: userProfile.location,
                 localLink: userProfile.link,
+                localSystemLocation: userProfile.systemLocation,
                 onProfileUpdated: {
                     // Handle profile updated here, if needed
                 },

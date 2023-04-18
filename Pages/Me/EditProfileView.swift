@@ -6,6 +6,7 @@ import FirebaseAuth
 import FirebaseStorage
 import FirebaseFirestore
 import CoreLocation
+import CoreLocationUI
 
 struct EditProfileView_Previews: PreviewProvider {
     static var previews: some View {
@@ -15,39 +16,10 @@ struct EditProfileView_Previews: PreviewProvider {
             localName: "",
             localHeadline: "",
             localLocation: "",
-            localLink: ""
+            localLink: "",
+            localSystemLocation: ""
         )
         .environmentObject(UserProfileData.previewData())
-    }
-}
-
-extension CLLocationManager {
-    func startUpdatingLocationOnce() {
-        requestWhenInUseAuthorization()
-        startUpdatingLocation()
-    }
-}
-
-class EditProfileViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
-    @Published var currentLocation: CLLocation?
-
-    private let locationManager = CLLocationManager()
-
-    override init() {
-        super.init()
-        locationManager.delegate = self
-    }
-
-    func requestLocation() {
-        locationManager.startUpdatingLocationOnce()
-    }
-
-    // 4. Implement the CLLocationManagerDelegate to update the user's location.
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if let location = locations.last {
-            currentLocation = location
-            manager.stopUpdatingLocation()
-        }
     }
 }
 
@@ -75,6 +47,7 @@ struct EditProfileView: View {
     @State private var localName: String
     @State private var localHeadline: String
     @State private var localLocation: String
+    @State private var localSystemLocation: String
     @State private var localLink: String
     @State private var localProfileImage: UIImage?
     @State private var localProfileImageURL: String?
@@ -88,6 +61,7 @@ struct EditProfileView: View {
          localHeadline: String,
          localLocation: String,
          localLink: String,
+         localSystemLocation: String,
          onProfileUpdated: (() -> Void)? = nil,
          onProfileImageUpdated: ((UIImage) -> Bool)? = nil) {
         self._userProfile = ObservedObject(wrappedValue: userProfile)
@@ -98,6 +72,7 @@ struct EditProfileView: View {
         self._localLink = State(initialValue: localLink)
         self.onProfileUpdated = onProfileUpdated
         self.onProfileImageUpdated = onProfileImageUpdated
+        self._localSystemLocation = State(initialValue: localSystemLocation)
     }
     
     func loadSettings() {
@@ -145,6 +120,7 @@ struct EditProfileView: View {
             "headline": userProfile.headline,
             "location": userProfile.location,
             "link": userProfile.link,
+            "systemLocation": userProfile.systemLocation,
         ]) { error in
             if let error = error {
                 errorMessage = "Error updating profile: \(error.localizedDescription)"
@@ -188,6 +164,7 @@ struct EditProfileView: View {
         userProfile.link = localLink
         userProfile.profileImageURL = localProfileImageURL
         profileImage = localProfileImage
+        userProfile.systemLocation = localSystemLocation
         
         if let user = Auth.auth().currentUser {
             let userRef = Firestore.firestore().collection("users").document(user.uid)
@@ -367,6 +344,7 @@ struct EditProfileView: View {
                     print("Error geocoding location: \(error.localizedDescription)")
                 } else if let placemark = placemarks?.first {
                     localLocation = "\(placemark.locality ?? ""), \(placemark.administrativeArea ?? "")"
+                    localSystemLocation = "\(placemark.locality ?? ""), \(placemark.administrativeArea ?? "")"
                     hasChanges = true
                     updateSaveButtonState()
                 }
@@ -388,25 +366,8 @@ struct EditProfileView: View {
     private func updateSaveButtonState() {
         if localName.isEmpty || localName == userProfile.name && localHeadline == userProfile.headline && localLocation == userProfile.location && localProfileImageURL == userProfile.profileImageURL && !hasChanges {
             isSaveDisabled = true
-            
-            print(localName == userProfile.name,
-                  localHeadline == userProfile.headline,
-                  localLocation == userProfile.location,
-                  localLink == userProfile.link,
-                  localProfileImage == profileImage,
-                  localProfileImageURL == userProfile.profileImageURL, hasChanges)
-            
         } else {
             isSaveDisabled = false
-            
-            print(localName == userProfile.name,
-                  localHeadline == userProfile.headline,
-                  localLocation == userProfile.location,
-                  localLink == userProfile.link,
-                  localProfileImage == profileImage,
-                  localProfileImageURL == userProfile.profileImageURL, hasChanges)
-            
-            
         }
     }
     
