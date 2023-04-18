@@ -5,6 +5,7 @@ import Firebase
 import FirebaseAuth
 import FirebaseStorage
 import FirebaseFirestore
+import CoreLocation
 
 struct EditProfileView_Previews: PreviewProvider {
     static var previews: some View {
@@ -17,6 +18,36 @@ struct EditProfileView_Previews: PreviewProvider {
             localLink: ""
         )
         .environmentObject(UserProfileData.previewData())
+    }
+}
+
+extension CLLocationManager {
+    func startUpdatingLocationOnce() {
+        requestWhenInUseAuthorization()
+        startUpdatingLocation()
+    }
+}
+
+class EditProfileViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
+    @Published var currentLocation: CLLocation?
+
+    private let locationManager = CLLocationManager()
+
+    override init() {
+        super.init()
+        locationManager.delegate = self
+    }
+
+    func requestLocation() {
+        locationManager.startUpdatingLocationOnce()
+    }
+
+    // 4. Implement the CLLocationManagerDelegate to update the user's location.
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.last {
+            currentLocation = location
+            manager.stopUpdatingLocation()
+        }
     }
 }
 
@@ -49,6 +80,7 @@ struct EditProfileView: View {
     @State private var localProfileImageURL: String?
     @State private var isProfileImageLoaded = false
     @State private var isInitialLoad = true
+    @StateObject private var viewModel = EditProfileViewModel()
     
     init(userProfile: UserProfile,
          profileImage: Binding<UIImage?>,
@@ -311,10 +343,33 @@ struct EditProfileView: View {
     
     private var locationSection: some View {
         Section(header: Text("Location")) {
-            TextField("Find practitioners near you", text: $localLocation)
+            HStack {
+                TextField("Find practitioners near you", text: $localLocation)
+                // 5. Add a location button in the `locationSection` view.
+                Button(action: {
+                    // 6. Update the user's location string when the location button is pressed.
+                    viewModel.requestLocation()
+                }) {
+                    Image(systemName: "location.fill")
+                        .foregroundColor(.blue)
+                }
+            }
             .onChange(of: localLocation) { newValue in
                 hasChanges = true
                 updateSaveButtonState()
+            }
+        }
+        .onChange(of: viewModel.currentLocation) { location in
+            guard let location = location else { return }
+            let geocoder = CLGeocoder()
+            geocoder.reverseGeocodeLocation(location) { placemarks, error in
+                if let error = error {
+                    print("Error geocoding location: \(error.localizedDescription)")
+                } else if let placemark = placemarks?.first {
+                    localLocation = "\(placemark.locality ?? ""), \(placemark.administrativeArea ?? "")"
+                    hasChanges = true
+                    updateSaveButtonState()
+                }
             }
         }
     }
