@@ -19,6 +19,8 @@ class UserProfile: ObservableObject, Identifiable, Equatable {
     @Published var joined: Date = Date()
     @Published var active: Date = Date()
     @Published var verified: Bool = false
+    @Published var specializations: [String] = []
+    @Published var isAdmin: Bool = false
     
     static func == (lhs: UserProfile, rhs: UserProfile) -> Bool {
             return lhs.name == rhs.name &&

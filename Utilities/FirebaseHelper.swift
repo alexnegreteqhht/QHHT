@@ -70,6 +70,7 @@ struct FirebaseHelper {
                     userProfile.joined = document.get("joined") as? Date ?? Date()
                     userProfile.active = document.get("active") as? Date ?? Date()
                     userProfile.verified = document.get("verified") as? Bool ?? false
+                    userProfile.isAdmin = document.get("isAdmin") as? Bool ?? false
                 } else {
                     print("Document does not exist.")
                 }

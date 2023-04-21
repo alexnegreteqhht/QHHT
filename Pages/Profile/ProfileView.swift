@@ -1,7 +1,5 @@
+import Foundation
 import SwiftUI
-import Firebase
-import FirebaseFirestore
-import Combine
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
@@ -20,11 +18,13 @@ struct ProfileView: View {
     @State private var isSettingsPresented = false
     @State private var isLoading = false
     @State private var profileImage: UIImage? = nil
+    @State private var isAdmin = false
+    @State private var showAdminView = false
     
     private let profileImageSize: CGFloat = 150
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             GeometryReader { geometry in
                 ScrollView {
                     VStack(alignment: .center, spacing: 16) {
@@ -81,6 +81,14 @@ struct ProfileView: View {
                 }
             })
         }
+        .navigationBarTitle("Profile", displayMode: .large)
+        .navigationBarItems(trailing: isAdmin ? Button(action: {
+            showAdminView.toggle()
+        }, label: {
+            Text("Admin")
+        }).sheet(isPresented: $showAdminView) {
+            AdminView()
+        } : nil)
     }
     
     private func loadProfileImage() {
@@ -102,101 +110,6 @@ struct ProfileView: View {
                     userProfileData.isLoading = false
                 }
             }
-        }
-    }
-}
-
-struct ProfileImage: View {
-    @EnvironmentObject var userProfileData: UserProfileData
-    @ObservedObject var userProfile: UserProfile
-    @Binding var profileImage: UIImage?
-    @Binding var isEditProfilePresented: Bool
-    @State private var isLoading: Bool = false
-    
-    var body: some View {
-        Group {
-            if let profileImage = profileImage {
-                Image(uiImage: profileImage)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 150, height: 150)
-                    .clipShape(Circle())
-            } else if isLoading {
-                ProgressView()
-                    .frame(width: 150, height: 150)
-            } else {
-                Button(action: {
-                    isEditProfilePresented.toggle()
-                }) {
-                    Image(systemName: "person.crop.circle.fill.badge.plus")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 150, height: 150)
-                        .foregroundColor(.gray)
-                }
-            }
-        }
-        .onReceive(userProfileData.$isLoading) { newIsLoading in
-            isLoading = newIsLoading
-        }
-    }
-}
-
-struct EditProfileButton: View {
-    @Binding var isEditProfilePresented: Bool
-        @ObservedObject var userProfile: UserProfile
-        @Binding var tempProfileImage: UIImage?
-        @Binding var isSettingsPresented: Bool
-        @Binding var profileImage: UIImage?
-        var onProfileUpdated: (() -> Void)?
-    
-    var body: some View {
-        Button(action: {
-            isEditProfilePresented.toggle()
-            isSettingsPresented = false
-        }) {
-            Text("Edit Profile")
-                .frame(minWidth: 0, maxWidth: .infinity)
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-        }
-        .padding(.horizontal, 20)
-        .sheet(isPresented: $isEditProfilePresented) {
-            EditProfileView(
-                userProfile: userProfile,
-                profileImage: $profileImage,
-                localName: userProfile.name,
-                localHeadline: userProfile.headline,
-                localLocation: userProfile.location,
-                localLink: userProfile.link,
-                localSystemLocation: userProfile.systemLocation,
-                onProfileUpdated: {
-                    // Handle profile updated here, if needed
-                },
-                onProfileImageUpdated: { updatedProfileImage in
-                    profileImage = updatedProfileImage
-                    return true
-                }
-            )
-        }
-    }
-}
-
-struct SettingsButton: View {
-    @Binding var isSettingsPresented: Bool
-    @ObservedObject var userProfile: UserProfile
-    
-    var body: some View {
-        Button(action: {
-            isSettingsPresented.toggle()
-        }) {
-            Text("Settings")
-        }
-        .padding(.horizontal, 20)
-        .sheet(isPresented: $isSettingsPresented) {
-            SettingsView(userProfile: userProfile)
         }
     }
 }
