@@ -75,6 +75,7 @@ struct ProfileView: View {
                                 }, label: {
                                     Text("Admin")
                                 })
+                                .buttonStyle(SubtleButtonStyle())
                                 .sheet(isPresented: $showAdminView) {
                                     AdminView()
                                 }
@@ -117,3 +118,4 @@ struct ProfileView: View {
         }
     }
 }
+

@@ -291,7 +291,7 @@ struct EditProfileView: View {
     
     private var nameSection: some View {
         Section(header: Text("Name")) {
-            TextField("Your identity on the platform", text: $localName)
+            TextField("Your identity", text: $localName)
             .onChange(of: localName) { newValue in
                 hasChanges = true
                 updateSaveButtonState()
@@ -309,7 +309,7 @@ struct EditProfileView: View {
                     localHeadline = mutableValue
                 }
             )
-            TextField("Introduce yourself to the community", text: headlineBinding)
+            TextField("Introduce yourself", text: headlineBinding)
                 .onChange(of: headlineBinding.wrappedValue) { newValue in
                     var mutableValue = newValue
                     _ = Validator.validateStringLength(&mutableValue, maxLength: 60)
@@ -325,7 +325,7 @@ struct EditProfileView: View {
     private var locationSection: some View {
         Section(header: Text("Location")) {
             HStack {
-                TextField("Find practitioners near you", text: $localLocation)
+                TextField("Find practitioners", text: $localLocation)
                 // 5. Add a location button in the `locationSection` view.
                 Button(action: {
                     // 6. Update the user's location string when the location button is pressed.
@@ -358,7 +358,7 @@ struct EditProfileView: View {
     
     private var linkSection: some View {
         Section(header: Text("Link")) {
-            TextField("Primary website or social media", text: $localLink)
+            TextField("Primary URL", text: $localLink)
                 .autocapitalization(.none)
             .onChange(of: localLink) { newValue in
                 hasChanges = true
