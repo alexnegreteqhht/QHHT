@@ -7,8 +7,10 @@
 
 import Foundation
 import SwiftUI
+import Combine
 import FirebaseFirestore
 import Firebase
+import FirebaseStorage
 
 class VerificationManager {
     func approveUser(userProfile: UserProfile) {
@@ -59,7 +61,7 @@ func fetchUserProfile(userId: String, completion: @escaping (UserProfile?) -> Vo
 }
 
 struct AdminPractitionerApprovalView: View {
-    @State private var unapprovedPractitioners: [UserProfile] = [] // Store unapproved practitioners here
+    @State private var unapprovedPractitioners: [UserProfile] = [] // Change to UserProfile
 
     func fetchUnapprovedPractitioners(completion: @escaping ([UserProfile]) -> Void) {
         let db = Firestore.firestore()
@@ -76,6 +78,7 @@ struct AdminPractitionerApprovalView: View {
                     let userProfile = UserProfile()
                     // Parse the document data and populate the userProfile instance
                     // For example:
+                    userProfile.id = document.documentID // Add this line
                     userProfile.name = document.get("name") as? String ?? ""
                     userProfile.headline = document.get("headline") as? String ?? ""
                     userProfile.location = document.get("location") as? String ?? ""
@@ -85,6 +88,8 @@ struct AdminPractitionerApprovalView: View {
                     // ... (Add any other necessary fields)
                     
                     unapprovedPractitioners.append(userProfile)
+                    
+                    print("Fetched practitioner: \(userProfile)")
                 }
                 completion(unapprovedPractitioners)
             }
@@ -107,22 +112,84 @@ struct AdminPractitionerApprovalView: View {
     }
 
     var body: some View {
-        List(unapprovedPractitioners) { practitioner in
-            HStack {
-                VStack(alignment: .leading) {
-                    Text(practitioner.name)
-                        .font(.headline)
-                    Text(practitioner.headline)
-                        .font(.subheadline)
+        NavigationView {
+            List(unapprovedPractitioners, id: \.id) { practitioner in // Add 'id: \.id' to List
+                NavigationLink(destination: UserProfileView(user: practitioner)) {
+                    HStack {
+                        FirebaseImage(url: practitioner.profileImageURL ?? "")
+                            .frame(width: 50, height: 50)
+                            .clipShape(Circle())
+
+                        VStack(alignment: .leading) {
+                            Text(practitioner.name)
+                                .font(.headline)
+                            Text(practitioner.headline)
+                                .font(.subheadline)
+                        }
+                        Spacer()
+                        approveButton(for: practitioner)
+                    }
                 }
-                Spacer()
-                approveButton(for: practitioner)
             }
-        }
-        .onAppear {
-            fetchUnapprovedPractitioners { fetchedPractitioners in
-                unapprovedPractitioners = fetchedPractitioners
+            .onAppear {
+                fetchUnapprovedPractitioners { fetchedPractitioners in
+                    unapprovedPractitioners = fetchedPractitioners
+                    print("Fetched practitioners count: \(unapprovedPractitioners.count)") // Add this line
+                }
             }
         }
     }
 }
+
+struct UserProfileView: View {
+    var user: UserProfile
+    
+    var body: some View {
+        Text("User profile for \(user.name)")
+    }
+}
+
+func downloadImage(url: String, completion: @escaping (Data?) -> Void) {
+    let storageRef = Storage.storage().reference(forURL: url)
+    storageRef.getData(maxSize: 1 * 1024 * 1024) { data, error in
+        if let error = error {
+            print("Error downloading image: \(error.localizedDescription)")
+            completion(nil)
+        } else {
+            completion(data)
+        }
+    }
+}
+
+struct FirebaseImage: View {
+    @State private var imageData: Data?
+    let url: String
+    
+    var body: some View {
+        Group {
+            if let data = imageData, let uiImage = UIImage(data: data) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } else {
+                Image(systemName: "person.circle.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            }
+        }
+        .onAppear {
+            downloadImage(url: url) { data in
+                imageData = data
+            }
+        }
+    }
+}
+
+struct PractitionerProfileView: View {
+    var practitioner: UserProfile
+
+    var body: some View {
+        Text("User profile for \(practitioner.name)")
+    }
+}
+
