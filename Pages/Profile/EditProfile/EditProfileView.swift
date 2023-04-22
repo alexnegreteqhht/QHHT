@@ -230,21 +230,17 @@ struct EditProfileView: View {
     
     private var profileImageSection: some View {
         Section {
-            if let profileImage = profileImage {
-                Button(action: {
-                    showImagePicker.toggle()
-                }) {
-                    Image(uiImage: localProfileImage ?? profileImage)
+            Button(action: {
+                showImagePicker.toggle()
+            }) {
+                if let localProfileImage = localProfileImage {
+                    Image(uiImage: localProfileImage)
                         .resizable()
                         .scaledToFill()
                         .frame(width: 150, height: 150)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .clipShape(Circle())
-                }
-            } else {
-                Button(action: {
-                    showImagePicker.toggle()
-                }) {
+                } else {
                     ZStack {
                         RoundedRectangle(cornerRadius: 75)
                             .foregroundColor(.clear)
@@ -263,15 +259,14 @@ struct EditProfileView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
+                    .id("placeholder")
                 }
             }
-
+            
             Button(action: {
                 showImagePicker.toggle()
-                hasChanges = true
-                updateSaveButtonState()
             }) {
-                if profileImage != nil {
+                if localProfileImage != nil {
                     Text("Edit Photo")
                         .frame(maxWidth: .infinity, alignment: .center)
                 } else {
@@ -280,8 +275,17 @@ struct EditProfileView: View {
                 }
             }
         }
-        .sheet(isPresented: $showImagePicker) {
+        .sheet(isPresented: $showImagePicker, onDismiss: handleImageChange) {
             ImagePicker(selectedImage: $localProfileImage, imageData: $profileImageData)
+        }
+    }
+    
+    func handleImageChange() {
+        DispatchQueue.main.async {
+            if localProfileImage != nil {
+                hasChanges = true
+                updateSaveButtonState()
+            }
         }
     }
     
