@@ -68,6 +68,17 @@ struct ProfileView: View {
                             EditProfileButton(isEditProfilePresented: $isEditProfilePresented, userProfile: userProfile, tempProfileImage: $tempProfileImage, isSettingsPresented: $isSettingsPresented, profileImage: $profileImage, onProfileUpdated: loadProfileImage)
                             
                             SettingsButton(isSettingsPresented: $isSettingsPresented, userProfile: userProfile)
+                            
+                            if userProfileData.userProfile?.isAdmin == true {
+                                Button(action: {
+                                    showAdminView.toggle()
+                                }, label: {
+                                    Text("Admin")
+                                })
+                                .sheet(isPresented: $showAdminView) {
+                                    AdminView()
+                                }
+                            }
                         }
                     }
                     .padding(.top, 50)
@@ -82,13 +93,6 @@ struct ProfileView: View {
             })
         }
         .navigationBarTitle("Profile", displayMode: .large)
-        .navigationBarItems(trailing: isAdmin ? Button(action: {
-            showAdminView.toggle()
-        }, label: {
-            Text("Admin")
-        }).sheet(isPresented: $showAdminView) {
-            AdminView()
-        } : nil)
     }
     
     private func loadProfileImage() {

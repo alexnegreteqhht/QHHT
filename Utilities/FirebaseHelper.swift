@@ -12,7 +12,7 @@ enum FirebaseHelperError: Error {
 struct FirebaseHelper {
     static let shared = FirebaseHelper()
     
-    func createUserDocument(systemId: String, systemName: String, systemEmail: String, systemLocation: String, id: String, name: String, email: String, location: String, phone: String, headline: String, link: String, profileImageURL: String, credentialImageURL: String, birthday: Date, joined: Date, active: Date, verified: Bool) {
+    func createUserDocument(systemId: String, systemName: String, systemEmail: String, systemLocation: String, id: String, name: String, email: String, location: String, phone: String, headline: String, link: String, profileImageURL: String, credentialImageURL: String, birthday: Date, joined: Date, active: Date, verified: Bool, specializations: [String], isAdmin: Bool) {
         if let user = Auth.auth().currentUser {
             let db = Firestore.firestore()
             let userDocRef = db.collection("users").document(user.uid)
@@ -33,7 +33,9 @@ struct FirebaseHelper {
                 "birthday": birthday,
                 "joined": joined,
                 "active": active,
-                "verified": verified
+                "verified": verified,
+                "specializations": specializations,
+                "isAdmin": isAdmin
             ]) { error in
                 if let error = error {
                     print("Error creating or updating user document: \(error)")
@@ -70,6 +72,7 @@ struct FirebaseHelper {
                     userProfile.joined = document.get("joined") as? Date ?? Date()
                     userProfile.active = document.get("active") as? Date ?? Date()
                     userProfile.verified = document.get("verified") as? Bool ?? false
+                    userProfile.specializations = document.get("specializations") as? [String] ?? []
                     userProfile.isAdmin = document.get("isAdmin") as? Bool ?? false
                 } else {
                     print("Document does not exist.")

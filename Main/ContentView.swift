@@ -17,7 +17,6 @@ struct ContentView: View {
                     Text("Directory")
                 }
                 .tag(0)
-                .environmentObject(appData)
                
             ForumView()
                 .navigationBarTitle("Forum", displayMode: .automatic)
@@ -26,7 +25,6 @@ struct ContentView: View {
                     Text("Forum")
                 }
                 .tag(1)
-                .environmentObject(appData)
                
             ProfileView(userProfile: userProfile)
                 .navigationBarTitle("Me", displayMode: .automatic)
@@ -35,7 +33,6 @@ struct ContentView: View {
                     Text("Me")
                 }
                 .tag(2)
-                .environmentObject(appData)
         }
         .onAppear {
             FirebaseHelper().fetchUserData { fetchedUserProfile in

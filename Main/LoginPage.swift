@@ -53,7 +53,9 @@ struct LoginPage: View {
                                     let joined = Date()
                                     let active = Date()
                                     let verified = false
-                                    FirebaseHelper().createUserDocument(systemId: systemId, systemName: systemName, systemEmail: systemEmail, systemLocation: systemLocation, id: id, name: name, email: email, location: location, phone: phone, headline: headline, link: link, profileImageURL: profileImageURL, credentialImageURL: credentialImageURL, birthday: birthday, joined: joined, active: active, verified: verified)
+                                    let specializations = [String]()
+                                    let isAdmin = false
+                                    FirebaseHelper().createUserDocument(systemId: systemId, systemName: systemName, systemEmail: systemEmail, systemLocation: systemLocation, id: id, name: name, email: email, location: location, phone: phone, headline: headline, link: link, profileImageURL: profileImageURL, credentialImageURL: credentialImageURL, birthday: birthday, joined: joined, active: active, verified: verified, specializations: specializations, isAdmin: isAdmin)
                                 }
                             }
                         }
