@@ -5,6 +5,7 @@
 //  Created by Alex Negrete on 4/21/23.
 //
 
+import Foundation
 import SwiftUI
 
 struct AdminView: View {
@@ -12,7 +13,7 @@ struct AdminView: View {
         NavigationView {
             VStack(alignment: .leading, spacing: 16) {
                 NavigationLink(destination: AdminPractitionerApprovalView()) {
-                    Text("Practitioner Approval")
+                    Text("Approve Practitioners")
                         .font(.title2)
                         .fontWeight(.semibold)
                         .padding(.vertical, 10)
@@ -35,16 +36,5 @@ struct AdminView: View {
 struct AdminView_Previews: PreviewProvider {
     static var previews: some View {
         AdminView()
-    }
-}
-
-struct AdminButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.blue.opacity(0.1)))
-            .foregroundColor(.blue)
     }
 }

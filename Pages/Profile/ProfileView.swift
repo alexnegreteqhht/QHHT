@@ -75,7 +75,7 @@ struct ProfileView: View {
                                 }, label: {
                                     Text("Admin")
                                 })
-                                .buttonStyle(AdminButtonStyle())
+                                .buttonStyle(AdminHelper.AdminButtonStyle())
                                 .sheet(isPresented: $showAdminView) {
                                     AdminView()
                                 }

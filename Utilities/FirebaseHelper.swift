@@ -139,4 +139,98 @@ struct FirebaseHelper {
             completion(nil, NSError(domain: "FirebaseHelper", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]))
         }
     }
+    
+    static func downloadImage(url: String, completion: @escaping (Data?) -> Void) {
+        let storageRef = Storage.storage().reference(forURL: url)
+        storageRef.getData(maxSize: 10 * 1024 * 1024) { data, error in
+            if let error = error {
+                print("Error downloading image: \(error.localizedDescription)")
+                completion(nil)
+            } else {
+                completion(data)
+            }
+        }
+    }
+    
+    static func fetchUnapprovedPractitioners(completion: @escaping ([UserProfile]) -> Void) {
+        let db = Firestore.firestore()
+        let usersCollectionRef = db.collection("users")
+        
+        // Query users who have submitted a credentialImageURL and are not approved
+        usersCollectionRef.whereField("credentialImageURL", isNotEqualTo: "").whereField("verified", isEqualTo: false).getDocuments { (querySnapshot, error) in
+            if let error = error {
+                print("Error fetching unapproved practitioners: \(error.localizedDescription)")
+                completion([])
+            } else {
+                print("Number of documents fetched: \(querySnapshot!.documents.count)")
+                var unapprovedPractitioners: [UserProfile] = []
+                for document in querySnapshot!.documents {
+                    print("Fetched document data: \(document.data())")
+                    let userProfile = UserProfile()
+                    // Parse the document data and populate the userProfile instance
+                    // For example:
+                    userProfile.id = document.documentID // Add this line
+                    userProfile.name = document.get("name") as? String ?? ""
+                    userProfile.headline = document.get("headline") as? String ?? ""
+                    userProfile.location = document.get("location") as? String ?? ""
+                    userProfile.link = document.get("link") as? String ?? ""
+                    userProfile.profileImageURL = document.get("profileImageURL") as? String
+                    userProfile.credentialImageURL = document.get("credentialImageURL") as? String
+                    // ... (Add any other necessary fields)
+                    
+                    unapprovedPractitioners.append(userProfile)
+                    
+                    print("Fetched practitioner: \(userProfile)")
+                }
+                completion(unapprovedPractitioners)
+            }
+        }
+    }
+    
+    static func fetchUserProfile(userId: String, completion: @escaping (UserProfile?) -> Void) {
+        let db = Firestore.firestore()
+        let userDocumentRef = db.collection("users").document(userId)
+        
+        userDocumentRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                let userProfile = UserProfile() // Create a new UserProfile instance
+                // Parse the document data and populate the userProfile instance
+                // For example:
+                userProfile.name = document.get("name") as? String ?? ""
+                userProfile.headline = document.get("headline") as? String ?? ""
+                userProfile.location = document.get("location") as? String ?? ""
+                userProfile.link = document.get("link") as? String ?? ""
+                userProfile.profileImageURL = document.get("profileImageURL") as? String
+                
+                completion(userProfile)
+            } else {
+                print("User not found: \(error?.localizedDescription ?? "No error description")")
+                completion(nil)
+            }
+        }
+    }
+}
+
+struct FirebaseImage: View {
+    @State private var imageData: Data?
+    let url: String
+    
+    var body: some View {
+        Group {
+            if let data = imageData, let uiImage = UIImage(data: data) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } else {
+                Image(systemName: "person.circle.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            }
+        }
+        .onAppear {
+            FirebaseHelper.downloadImage(url: url) { data in
+                imageData = data
+            }
+        }
+    }
 }
