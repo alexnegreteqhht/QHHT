@@ -73,8 +73,10 @@ struct AdminPractitionerApprovalView: View {
                 print("Error fetching unapproved practitioners: \(error.localizedDescription)")
                 completion([])
             } else {
+                print("Number of documents fetched: \(querySnapshot!.documents.count)")
                 var unapprovedPractitioners: [UserProfile] = []
                 for document in querySnapshot!.documents {
+                    print("Fetched document data: \(document.data())")
                     let userProfile = UserProfile()
                     // Parse the document data and populate the userProfile instance
                     // For example:
@@ -134,7 +136,7 @@ struct AdminPractitionerApprovalView: View {
             .onAppear {
                 fetchUnapprovedPractitioners { fetchedPractitioners in
                     unapprovedPractitioners = fetchedPractitioners
-                    print("Fetched practitioners count: \(unapprovedPractitioners.count)") // Add this line
+                    print("Fetched practitioners count: \(unapprovedPractitioners.count)")
                 }
             }
         }
@@ -151,7 +153,7 @@ struct UserProfileView: View {
 
 func downloadImage(url: String, completion: @escaping (Data?) -> Void) {
     let storageRef = Storage.storage().reference(forURL: url)
-    storageRef.getData(maxSize: 1 * 1024 * 1024) { data, error in
+    storageRef.getData(maxSize: 10 * 1024 * 1024) { data, error in
         if let error = error {
             print("Error downloading image: \(error.localizedDescription)")
             completion(nil)
