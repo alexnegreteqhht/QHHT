@@ -65,7 +65,20 @@ struct ProfileView: View {
                                 }
                             }
                         
-                            EditProfileButton(isEditProfilePresented: $isEditProfilePresented, userProfile: userProfile, tempProfileImage: $tempProfileImage, isSettingsPresented: $isSettingsPresented, profileImage: $profileImage, onProfileUpdated: loadProfileImage)
+                            EditProfileButton(
+                                isEditProfilePresented: $isEditProfilePresented,
+                                userProfile: userProfile,
+                                tempProfileImage: $tempProfileImage,
+                                isSettingsPresented: $isSettingsPresented,
+                                profileImage: $profileImage,
+                                onProfileUpdated: {
+                                    FirebaseHelper.loadProfileImage(userProfileData: userProfileData) { uiImage in
+                                        if let uiImage = uiImage {
+                                            profileImage = uiImage
+                                        }
+                                    }
+                                }
+                            )
                             
                             SettingsButton(isSettingsPresented: $isSettingsPresented, userProfile: userProfile)
                             
@@ -89,33 +102,15 @@ struct ProfileView: View {
             }
             .onAppear(perform: {
                 if profileImage == nil {
-                    loadProfileImage()
+                    FirebaseHelper.loadProfileImage(userProfileData: userProfileData) { uiImage in
+                        if let uiImage = uiImage {
+                            profileImage = uiImage
+                        }
+                    }
                 }
             })
         }
         .navigationBarTitle("Profile", displayMode: .large)
-    }
-    
-    private func loadProfileImage() {
-        if let userProfile = userProfileData.userProfile, let profileImageURL = userProfile.profileImageURL {
-            print("Loading profile image from URL:", profileImageURL)
-            userProfileData.isLoading = true
-            FirebaseHelper.loadImageFromURL(urlString: profileImageURL) { uiImage, error in
-                if let error = error {
-                    print("Error loading profile image:", error.localizedDescription)
-                } else if let uiImage = uiImage {
-                    print("Profile image loaded successfully")
-                    DispatchQueue.main.async {
-                        profileImage = uiImage
-                    }
-                } else {
-                    print("Profile image not loaded, no error returned")
-                }
-                DispatchQueue.main.async {
-                    userProfileData.isLoading = false
-                }
-            }
-        }
     }
 }
 

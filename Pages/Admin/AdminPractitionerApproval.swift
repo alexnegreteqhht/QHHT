@@ -13,7 +13,7 @@ struct AdminPractitionerApprovalView: View {
     var body: some View {
         VStack {
             if unapprovedPractitioners.isEmpty {
-                Text("No unapproved practitioners")
+                Text("No practitioners to display")
                     .font(.title)
                     .foregroundColor(.gray)
                     .padding()

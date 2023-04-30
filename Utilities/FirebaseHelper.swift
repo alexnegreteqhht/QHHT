@@ -209,6 +209,28 @@ struct FirebaseHelper {
             }
         }
     }
+    
+    static func loadProfileImage(userProfileData: UserProfileData, completion: @escaping (UIImage?) -> Void) {
+        if let userProfile = userProfileData.userProfile, let profileImageURL = userProfile.profileImageURL {
+            print("Loading profile image from URL:", profileImageURL)
+            userProfileData.isLoading = true
+            loadImageFromURL(urlString: profileImageURL) { uiImage, error in
+                if let error = error {
+                    print("Error loading profile image:", error.localizedDescription)
+                } else if let uiImage = uiImage {
+                    print("Profile image loaded successfully")
+                    DispatchQueue.main.async {
+                        completion(uiImage)
+                    }
+                } else {
+                    print("Profile image not loaded, no error returned")
+                }
+                DispatchQueue.main.async {
+                    userProfileData.isLoading = false
+                }
+            }
+        }
+    }
 }
 
 struct FirebaseImage: View {
