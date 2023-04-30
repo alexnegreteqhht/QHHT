@@ -8,6 +8,12 @@
 import Foundation
 import SwiftUI
 
+struct AdminView_Previews: PreviewProvider {
+    static var previews: some View {
+        AdminView()
+    }
+}
+
 struct AdminView: View {
     var body: some View {
         NavigationView {
@@ -30,11 +36,5 @@ struct AdminView: View {
             .padding()
             .navigationBarTitle("Admin Panel", displayMode: .large)
         }
-    }
-}
-
-struct AdminView_Previews: PreviewProvider {
-    static var previews: some View {
-        AdminView()
     }
 }
