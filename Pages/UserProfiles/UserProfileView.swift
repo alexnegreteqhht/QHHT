@@ -2,6 +2,8 @@ import Foundation
 import SwiftUI
 
 struct UserProfileView_Previews: PreviewProvider {
+    @State static var refreshPreview = false
+
     static var previews: some View {
         NavigationView {
             UserProfileView(
@@ -12,7 +14,8 @@ struct UserProfileView_Previews: PreviewProvider {
                     link: "https://www.example.com",
                     profileImageURL: ""
                 ),
-                showApproveButton: false
+                showApproveButton: false,
+                refreshParent: $refreshPreview
             )
             .environmentObject(UserProfileData())
         }
@@ -24,6 +27,7 @@ struct UserProfileView: View {
     let showApproveButton: Bool
     @State private var profileImage: UIImage? = nil
     @State private var isLoading = false
+    @Binding var refreshParent: Bool
 
     private let profileImageSize: CGFloat = 150
 
@@ -68,18 +72,46 @@ struct UserProfileView: View {
 
                     if showApproveButton {
                         Button(action: {
-                            let verificationManager = VerificationManager()
-                            verificationManager.approveUser(userProfile: user)
-                            // Refresh the list of unapproved practitioners
-                            // ...
+                            FirebaseHelper.approveUser(userProfile: user) { result in
+                                switch result {
+                                case .success():
+                                    // Trigger a refresh in the parent view
+                                    self.refreshParent = true
+                                case .failure(let error):
+                                    print("Error approving user: \(error.localizedDescription)")
+                                }
+                            }
                         }) {
                             Text("Approve")
+                                .frame(minWidth: 0, maxWidth: .infinity)
                                 .padding()
                                 .background(Color.blue)
                                 .foregroundColor(.white)
                                 .cornerRadius(8)
                         }
                         .padding(.top)
+                        .padding(.horizontal, 20)
+                        
+                        Button(action: {
+                            FirebaseHelper.declineUser(userProfile: user) { result in
+                                switch result {
+                                case .success():
+                                    // Trigger a refresh in the parent view
+                                    self.refreshParent = true
+                                case .failure(let error):
+                                    print("Error declining user: \(error.localizedDescription)")
+                                }
+                            }
+                        }) {
+                            Text("Decline")
+                                .frame(minWidth: 0, maxWidth: .infinity)
+                                .padding()
+                                .background(Color.red)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
+                        .padding(.horizontal, 20)
+                        
                     }
                 }
                 .padding(.top, 50)

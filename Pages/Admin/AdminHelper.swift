@@ -46,26 +46,4 @@ struct AdminHelper {
         )
         return practitionerProfile
     }
-    
-    static func approveButton(for practitioner: UserProfile) -> some View {
-        Button(action: {
-            let verificationManager = VerificationManager()
-            verificationManager.approveUser(userProfile: practitioner)
-            // Refresh the list of unapproved practitioners
-            // ...
-        }) {
-            Text("Approve")
-        }
-        .buttonStyle(AdminHelper.ApproveButtonStyle())
-    }
-}
-
-class VerificationManager {
-    func approveUser(userProfile: UserProfile) {
-        // Call the helper function to create a PractitionerProfile instance
-        let practitionerProfile = AdminHelper.userProfileToPractitionerProfile(userProfile: userProfile)
-
-        // Save the practitionerProfile to your backend, e.g., Firebase
-        // Update the userProfile's status in the backend to reflect that it's approved
-    }
 }

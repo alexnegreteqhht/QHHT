@@ -231,6 +231,68 @@ struct FirebaseHelper {
             }
         }
     }
+    
+    static func approveUser(userProfile: UserProfile, completion: @escaping (Result<Void, Error>) -> Void) {
+        let db = Firestore.firestore()
+        
+        // Get the reference to the specific user in the Firebase database
+        let userID = userProfile.id
+        let userRef = db.collection("users").document(userID)
+        
+        // Update the 'verified' property to true
+        userRef.updateData(["verified": true]) { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+    
+    static func declineUser(userProfile: UserProfile, completion: @escaping (Result<Void, Error>) -> Void) {
+        let db = Firestore.firestore()
+        let storage = Storage.storage()
+        
+        // Get the reference to the specific user in the Firebase database
+        let userID = userProfile.id
+        let userRef = db.collection("users").document(userID)
+        
+        // Start a batch update to perform both operations atomically
+        let batch = db.batch()
+        
+        // Remove the "credentialImage" field from the user's data
+        batch.updateData(["credentialImage": FieldValue.delete()], forDocument: userRef)
+        
+        // Remove the image from Firebase Storage if it's stored there
+        if let imageUrl = userProfile.credentialImageURL {
+            let imageRef = storage.reference(forURL: imageUrl)
+            imageRef.delete { error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                
+                // Commit the batch update
+                batch.commit { error in
+                    if let error = error {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(()))
+                    }
+                }
+            }
+        } else {
+            // Commit the batch update if there's no image to delete from Firebase Storage
+            batch.commit { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
+            }
+        }
+    }
 }
 
 struct FirebaseImage: View {
